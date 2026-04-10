@@ -1,0 +1,7 @@
+// import {
+//   "chnlkw/moonxi_board" @lib,
+// }
+
+options(
+  "is-main": true,
+)
