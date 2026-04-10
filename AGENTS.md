@@ -49,3 +49,17 @@ You can browse and install extra skills here:
   behavior. For solid, well-defined results (e.g. scientific computations),
   prefer assertion tests. You can use `moon coverage analyze > uncovered.log` to
   see which parts of your code are not covered by tests.
+
+## 项目
+
+这是一个多agent看板前端程序，方便管理多agent的各种会话
+
+## 记忆
+
+在 memory/ 目录维护记忆
+
+## 知识
+在 knowledge/ 目录维护知识
+
+## 任务
+在 tasks/ 目录管理已完成和未来的任务
