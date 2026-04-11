@@ -11,6 +11,20 @@ pub fn view_chat(dispatch : @cmd.Dispatch[Msg], model : Model) -> @html.Html {
         text("📋"),
       ]),
     ]),
+    // Connection settings bar
+    div(class="connection-bar", [
+      span(class="connection-dot", [text(connection_label(model.connection))]),
+      input(
+        class="base-url-input",
+        placeholder="OpenCode Serve URL (e.g. http://host:4096)",
+        value=model.base_url_input,
+        on_input=fn(t) { dispatch(BaseUrlChanged(t)) },
+        [nothing],
+      ),
+      button(class="btn-connect", on_click=dispatch(BaseUrlSubmitted), [
+        text("连接"),
+      ]),
+    ]),
     // Messages
     div(class="messages-container", [view_messages(model)]),
     // Input area

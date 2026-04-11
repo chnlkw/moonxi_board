@@ -1,4 +1,29 @@
 ///|
+extern "js" fn js_window_location_origin() -> String =
+  #|() => { try { return window.location.origin } catch(e) { return "http://localhost:4096" } }
+
+///|
+extern "js" fn js_localstorage_get(key : String) -> String? =
+  #|(key) => { try { return localStorage.getItem(key) || null } catch(e) { return null } }
+
+///|
+extern "js" fn js_localstorage_set(key : String, val : String) -> Unit =
+  #|(key, val) => { try { localStorage.setItem(key, val) } catch(e) {} }
+
+///|
+pub fn base_url() -> String {
+  match js_localstorage_get("moonxi_base_url") {
+    Some(url) if url.length() > 0 => url
+    _ => js_window_location_origin()
+  }
+}
+
+///|
+pub fn save_base_url(url : String) -> Unit {
+  js_localstorage_set("moonxi_base_url", url)
+}
+
+///|
 pub fn toggle_star(sessions : Array[Session], id : String) -> Array[Session] {
   sessions.map(fn(s) {
     if s.id == id {

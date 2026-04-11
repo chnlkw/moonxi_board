@@ -26,7 +26,7 @@ pub fn api_load_sessions(
   config : ServerConfig,
 ) -> @cmd.Cmd {
   @http.get(
-    "\{config.base_url}/sessions",
+    "\{config.base_url}/session",
     expect=@http.Json(
       fn(result) {
         match result {
@@ -49,15 +49,8 @@ pub fn api_create_session(
   config : ServerConfig,
 ) -> @cmd.Cmd {
   @http.post(
-    "\{config.base_url}/sessions",
-    @http.Body::Json({
-      "id": "",
-      "project_id": "",
-      "title": "New Session",
-      "directory": "",
-      "created_at": 0,
-      "updated_at": 0,
-    }),
+    "\{config.base_url}/session",
+    @http.Body::Json({ "title": "New Session" }),
     expect=@http.Json(
       fn(result) {
         match result {
@@ -81,63 +74,13 @@ pub fn api_delete_session(
   session_id : String,
 ) -> @cmd.Cmd {
   @http.delete(
-    "\{config.base_url}/sessions/\{session_id}",
+    "\{config.base_url}/session/\{session_id}",
     expect=@http.Text(fn(result) {
       match result {
         Ok(_) => dispatch(SSESessionDeleted(session_id))
         Err(msg) => dispatch(GotSessions(Err(msg)))
       }
     }),
-  )
-}
-
-// --- Agents ---
-
-///|
-pub fn api_load_agents(
-  dispatch : @cmd.Dispatch[Msg],
-  config : ServerConfig,
-) -> @cmd.Cmd {
-  @http.get(
-    "\{config.base_url}/agents",
-    expect=@http.Json(
-      fn(result) {
-        match result {
-          Ok(json) =>
-            match decode_agents(json) {
-              Ok(agents) => dispatch(GotAgents(Ok(agents)))
-              Err(e) => dispatch(GotAgents(Err(e)))
-            }
-          Err(msg) => dispatch(GotAgents(Err(msg)))
-        }
-      },
-      fn(json) { Ok(json) },
-    ),
-  )
-}
-
-// --- Projects ---
-
-///|
-pub fn api_load_projects(
-  dispatch : @cmd.Dispatch[Msg],
-  config : ServerConfig,
-) -> @cmd.Cmd {
-  @http.get(
-    "\{config.base_url}/projects",
-    expect=@http.Json(
-      fn(result) {
-        match result {
-          Ok(json) =>
-            match decode_projects(json) {
-              Ok(projects) => dispatch(GotProjects(Ok(projects)))
-              Err(e) => dispatch(GotProjects(Err(e)))
-            }
-          Err(msg) => dispatch(GotProjects(Err(msg)))
-        }
-      },
-      fn(json) { Ok(json) },
-    ),
   )
 }
 
@@ -150,7 +93,7 @@ pub fn api_load_messages(
   session_id : String,
 ) -> @cmd.Cmd {
   @http.get(
-    "\{config.base_url}/sessions/\{session_id}/messages",
+    "\{config.base_url}/session/\{session_id}/message",
     expect=@http.Json(
       fn(result) {
         match result {
@@ -176,8 +119,11 @@ pub fn api_send_message(
   agent : String,
 ) -> @cmd.Cmd {
   @http.post(
-    "\{config.base_url}/sessions/\{session_id}/messages",
-    @http.Body::Json({ "content": text, "role": "user", "agent_name": agent }),
+    "\{config.base_url}/session/\{session_id}/message",
+    @http.Body::Json({
+      "parts": [{ "type": "text", "text": text }],
+      "agent": agent,
+    }),
     expect=@http.Json(
       fn(result) {
         match result {

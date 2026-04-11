@@ -573,6 +573,53 @@
       color: #FF9800;
     }
 
+    /* ===== Connection Bar ===== */
+    .connection-bar {
+      padding: 6px 12px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      background: var(--bg-secondary);
+      font-size: 12px;
+    }
+
+    .connection-dot {
+      flex-shrink: 0;
+      color: var(--text-secondary);
+      font-size: 11px;
+    }
+
+    .base-url-input {
+      flex: 1;
+      padding: 4px 8px;
+      background: var(--bg-primary);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--text-primary);
+      font-size: 12px;
+      outline: none;
+    }
+
+    .base-url-input:focus {
+      border-color: var(--accent);
+    }
+
+    .btn-connect {
+      padding: 4px 12px;
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+      flex-shrink: 0;
+    }
+
+    .btn-connect:hover {
+      opacity: 0.85;
+    }
+
     /* ===== Status Bar ===== */
     .statusbar {
       position: fixed;
@@ -692,10 +739,6 @@
 </head>
 <body>
   <div id="app"></div>
-  <script>
-    // Load MoonBit compiled JS
-    // Build output: _build/js/release/build/src.js (or debug)
-    // For dev: use npx serve . and set correct path
-  </script>
+  <script src="src.js"></script>
 </body>
 </html>
