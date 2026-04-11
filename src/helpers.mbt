@@ -1,10 +1,10 @@
 ///|
-extern "js" fn js_window_location_origin() -> String =
-  #|() => { try { return window.location.origin } catch(e) { return "http://localhost:4096" } }
+extern "js" fn js_window_location_origin() -> String? =
+  #|() => { try { var o = window.location.origin; return (o && typeof o === 'string') ? o : null } catch(e) { return null } }
 
 ///|
 extern "js" fn js_localstorage_get(key : String) -> String? =
-  #|(key) => { try { return localStorage.getItem(key) || null } catch(e) { return null } }
+  #|(key) => { try { var v = localStorage.getItem(key); return (v !== null && v !== undefined && v !== '') ? v : null } catch(e) { return null } }
 
 ///|
 extern "js" fn js_localstorage_set(key : String, val : String) -> Unit =
@@ -12,9 +12,16 @@ extern "js" fn js_localstorage_set(key : String, val : String) -> Unit =
 
 ///|
 pub fn base_url() -> String {
-  match js_localstorage_get("moonxi_base_url") {
-    Some(url) if url.length() > 0 => url
-    _ => js_window_location_origin()
+  let stored = js_localstorage_get("moonxi_base_url")
+  match stored {
+    Some(url) => url
+    None => {
+      let origin = js_window_location_origin()
+      match origin {
+        Some(o) => o
+        None => "http://localhost:4096"
+      }
+    }
   }
 }
 

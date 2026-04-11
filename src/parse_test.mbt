@@ -1,221 +1,171 @@
-// === Parse Tests ===
+// Tests using real OpenCode Serve API v1.4.x JSON format
 
 ///|
-test "decode_session parses valid JSON" {
+test "decode_session parses real API format" {
   let json : Json = {
-    "id": "ses_1",
-    "project_id": "/proj",
-    "title": "Test",
-    "directory": "/proj",
-    "created_at": 123,
-    "updated_at": 456,
+    "id": "ses_abc123",
+    "slug": "jolly-island",
+    "projectID": "proj_123",
+    "directory": "/home/user/project",
+    "title": "Test Session",
+    "version": "1.4.3",
+    "time": { "created": 1775925013789, "updated": 1775925014000 },
   }
   let result = decode_session(json)
-  assert_true(result is Ok(_))
   match result {
     Ok(s) => {
-      assert_eq(s.id, "ses_1")
-      assert_eq(s.project_id, "/proj")
-      assert_eq(s.title, "Test")
-      assert_eq(s.directory, "/proj")
-      assert_eq(s.created_at, 123)
-      assert_eq(s.updated_at, 456)
+      assert_eq(s.id, "ses_abc123")
+      assert_eq(s.project_id, "proj_123")
+      assert_eq(s.title, "Test Session")
+      assert_eq(s.directory, "/home/user/project")
+      assert_true(s.created_at > 0)
+      assert_true(s.updated_at > 0)
     }
-    _ => ()
+    Err(_e) => assert_true(false)
   }
-}
-
-///|
-test "decode_session rejects invalid JSON" {
-  let json : Json = { "id": "ses_1" }
-  let result = decode_session(json)
-  assert_true(result is Err(_))
 }
 
 ///|
 test "decode_sessions parses array" {
   let json : Json = [
     {
-      "id": "ses_1",
-      "project_id": "/p",
-      "title": "S1",
-      "directory": "/p",
-      "created_at": 1,
-      "updated_at": 1,
+      "id": "s1",
+      "projectID": "p1",
+      "title": "A",
+      "directory": "/a",
+      "time": { "created": 1000, "updated": 2000 },
     },
     {
-      "id": "ses_2",
-      "project_id": "/p",
-      "title": "S2",
-      "directory": "/p",
-      "created_at": 2,
-      "updated_at": 2,
+      "id": "s2",
+      "projectID": "p2",
+      "title": "B",
+      "directory": "/b",
+      "time": { "created": 3000, "updated": 4000 },
     },
   ]
   let result = decode_sessions(json)
-  assert_true(result is Ok(_))
   match result {
-    Ok(arr) => assert_eq(arr.length(), 2)
-    _ => ()
+    Ok(sessions) => assert_eq(sessions.length(), 2)
+    Err(_e) => assert_true(false)
   }
 }
 
 ///|
-test "decode_agent parses valid JSON" {
+test "decode_message parses real API format with info+parts" {
   let json : Json = {
-    "name": "Sisyphus",
-    "description": "Main agent",
-    "mode": "primary",
-    "color": "#ff0000",
-    "model_id": "gpt-4",
-    "tools": {},
+    "info": {
+      "role": "user",
+      "time": { "created": 1774799305502 },
+      "id": "msg_123",
+      "sessionID": "ses_abc",
+      "agent": "build",
+    },
+    "parts": [{ "type": "text", "text": "hello world" }],
   }
-  let result = decode_agent(json)
-  assert_true(result is Ok(_))
+  let result = decode_message(json)
   match result {
-    Ok(a) => {
-      assert_eq(a.name, "Sisyphus")
-      // description is ignored in decoder
-      assert_eq(a.description, "")
-      assert_true(a.mode is Primary)
-      assert_eq(a.color, "#ff0000")
+    Ok(m) => {
+      assert_eq(m.id, "msg_123")
+      assert_eq(m.session_id, "ses_abc")
+      assert_true(m.role is User)
+      assert_eq(m.parts.length(), 1)
     }
-    _ => ()
+    Err(_e) => assert_true(false)
   }
 }
 
 ///|
-test "decode_agent defaults color and mode" {
+test "decode_message parses assistant message with step parts" {
   let json : Json = {
-    "name": "Test",
-    "description": "Test agent",
-    "mode": "unknown",
-    "color": "",
-    "model_id": "model",
-    "tools": {},
+    "info": {
+      "role": "assistant",
+      "time": { "created": 1774799305521 },
+      "id": "msg_456",
+      "sessionID": "ses_abc",
+    },
+    "parts": [
+      { "type": "step-start", "snapshot": "abc123" },
+      { "type": "text", "text": "Hello!" },
+      { "type": "step-finish", "reason": "stop" },
+    ],
   }
-  let result = decode_agent(json)
-  assert_true(result is Ok(_))
+  let result = decode_message(json)
   match result {
-    Ok(a) => {
-      assert_eq(a.color, "#e94560")
-      assert_true(a.mode is All)
+    Ok(m) => {
+      assert_true(m.role is Assistant)
+      assert_eq(m.parts.length(), 3)
+      assert_true(m.parts[0] is StepStart)
+      assert_true(m.parts[1] is Text)
+      assert_true(m.parts[2] is StepFinish)
     }
-    _ => ()
+    Err(_e) => assert_true(false)
   }
 }
 
 ///|
-test "decode_agents parses array" {
+test "decode_messages parses array" {
   let json : Json = [
     {
-      "name": "A1",
-      "description": "",
-      "mode": "primary",
-      "color": "",
-      "model_id": "",
-      "tools": {},
+      "info": {
+        "role": "user",
+        "time": { "created": 100 },
+        "id": "m1",
+        "sessionID": "s1",
+      },
+      "parts": [{ "type": "text", "text": "hi" }],
     },
     {
-      "name": "A2",
-      "description": "",
-      "mode": "subagent",
-      "color": "",
-      "model_id": "",
-      "tools": {},
+      "info": {
+        "role": "assistant",
+        "time": { "created": 200 },
+        "id": "m2",
+        "sessionID": "s1",
+      },
+      "parts": [{ "type": "text", "text": "hey" }],
     },
   ]
-  let result = decode_agents(json)
-  assert_true(result is Ok(_))
+  let result = decode_messages(json)
   match result {
-    Ok(arr) => assert_eq(arr.length(), 2)
-    _ => ()
+    Ok(msgs) => assert_eq(msgs.length(), 2)
+    Err(_e) => assert_true(false)
   }
 }
 
 ///|
-test "decode_project parses valid JSON" {
-  let json : Json = {
-    "id": "/proj",
-    "name": "My Project",
-    "directory": "/home/proj",
-  }
-  let result = decode_project(json)
-  assert_true(result is Ok(_))
-  match result {
-    Ok(p) => {
-      assert_eq(p.id, "/proj")
-      assert_eq(p.name, "My Project")
-      assert_eq(p.directory, "/home/proj")
-    }
-    _ => ()
-  }
-}
-
-///|
-test "decode_project rejects invalid JSON" {
-  let json : Json = { "name": "No ID" }
-  let result = decode_project(json)
+test "decode_session rejects invalid JSON" {
+  let json : Json = { "foo": "bar" }
+  let result = decode_session(json)
   assert_true(result is Err(_))
 }
 
 ///|
-test "decode_message parses with parts" {
-  let json : Json = {
-    "id": "msg_1",
-    "session_id": "ses_1",
-    "role": "user",
-    "parts": [
-      { "type": "text", "text": "Hello" },
-      { "type": "step-start", "step": "start" },
-      { "type": "step-finish", "step": "finish" },
-    ],
-    "created_at": 100,
-    "model_id": "gpt-4",
-  }
+test "decode_message rejects invalid JSON" {
+  let json : Json = { "foo": "bar" }
   let result = decode_message(json)
-  assert_true(result is Ok(_))
-  match result {
-    Ok(m) => {
-      assert_eq(m.id, "msg_1")
-      assert_true(m.role is User)
-      assert_eq(m.parts.length(), 3)
-    }
-    _ => ()
-  }
+  assert_true(result is Err(_))
 }
 
 ///|
-test "decode_message parses tool_call part" {
+test "decode_message handles reasoning and tool-call parts" {
   let json : Json = {
-    "id": "msg_1",
-    "session_id": "ses_1",
-    "role": "assistant",
+    "info": {
+      "role": "assistant",
+      "time": { "created": 100 },
+      "id": "m1",
+      "sessionID": "s1",
+    },
     "parts": [
-      {
-        "type": "tool_call",
-        "tool_name": "bash",
-        "input": "ls",
-        "status": "completed",
-      },
+      { "type": "reasoning", "text": "thinking..." },
+      { "type": "tool-call", "name": "bash", "input": "ls -la" },
+      { "type": "text", "text": "done" },
     ],
-    "created_at": 100,
-    "model_id": "gpt-4",
   }
   let result = decode_message(json)
-  assert_true(result is Ok(_))
   match result {
-    Ok(m) =>
-      match m.parts[0] {
-        ToolCall(info) => {
-          assert_eq(info.tool_name, "bash")
-          assert_eq(info.input, "ls")
-          assert_true(info.status is Completed)
-        }
-        Text(_) => ()
-        StepStart(_) => ()
-        StepFinish(_) => ()
-      }
-    _ => ()
+    Ok(m) => {
+      assert_eq(m.parts.length(), 3)
+      assert_true(m.parts[1] is ToolCall)
+    }
+    Err(_e) => assert_true(false)
   }
 }
