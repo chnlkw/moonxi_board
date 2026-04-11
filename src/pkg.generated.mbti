@@ -31,6 +31,8 @@ pub fn api_send_message(@cmd.Dispatch[Msg], ServerConfig, String, String, String
 
 pub fn append_message(Model, String, ChatMessage) -> Model
 
+pub fn base_url() -> String
+
 pub fn check_achievement(GameStats) -> String?
 
 pub fn connection_label(ConnectionStatus) -> String
