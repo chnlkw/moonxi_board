@@ -6,7 +6,6 @@ test "init_model has correct defaults" {
     password: "",
   }
   let model = init_model(config)
-  // Verify all default values
   assert_true(model.connection is Disconnected)
   assert_eq(model.projects.length(), 0)
   assert_eq(model.sessions.length(), 0)
@@ -21,6 +20,7 @@ test "init_model has correct defaults" {
   assert_eq(model.sse_connected, false)
   assert_eq(model.stats.total_messages, 0)
   assert_eq(model.stats.combo_streak, 0)
+  assert_eq(model.base_url_input, "http://localhost:4096")
 }
 
 ///|
@@ -34,4 +34,5 @@ test "init_model stores config" {
   assert_eq(model.config.base_url, "http://example.com")
   assert_eq(model.config.username, "user")
   assert_eq(model.config.password, "pass")
+  assert_eq(model.base_url_input, "http://example.com")
 }

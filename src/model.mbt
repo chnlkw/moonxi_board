@@ -137,6 +137,7 @@ pub struct Model {
   search_query : String
   sse_connected : Bool
   stats : GameStats
+  base_url_input : String
 } derive(Show)
 
 // === Msg ===
@@ -168,6 +169,8 @@ pub enum Msg {
   SSESessionUpdated(Session)
   SSESessionDeleted(String)
   KeyPressed(String)
+  BaseUrlChanged(String)
+  BaseUrlSubmitted
 }
 
 // === Init ===
@@ -190,5 +193,6 @@ pub fn init_model(config : ServerConfig) -> Model {
     search_query: "",
     sse_connected: false,
     stats: { total_messages: 0, combo_streak: 0 },
+    base_url_input: config.base_url,
   }
 }

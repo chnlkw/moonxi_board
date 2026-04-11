@@ -9,8 +9,6 @@ pub fn update(
       let cmd = @cmd.batch([
         api_health_check(dispatch, model.config),
         api_load_sessions(dispatch, model.config),
-        api_load_agents(dispatch, model.config),
-        api_load_projects(dispatch, model.config),
       ])
       (cmd, { ..model, connection: Connecting })
     }
@@ -73,5 +71,16 @@ pub fn update(
       )
     SSEMessageUpdated(sid, msg) => (@cmd.none, append_message(model, sid, msg))
     KeyPressed(_key) => (@cmd.none, model)
+    BaseUrlChanged(text) => (@cmd.none, { ..model, base_url_input: text })
+    BaseUrlSubmitted => {
+      let url = model.base_url_input
+      save_base_url(url)
+      let new_config = { ..model.config, base_url: url }
+      let cmd = @cmd.batch([
+        api_health_check(dispatch, new_config),
+        api_load_sessions(dispatch, new_config),
+      ])
+      (cmd, { ..model, config: new_config, connection: Connecting })
+    }
   }
 }
