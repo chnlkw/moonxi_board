@@ -19,11 +19,7 @@ pub fn api_delete_session(@cmd.Dispatch[Msg], ServerConfig, String) -> @cmd.Cmd
 
 pub fn api_health_check(@cmd.Dispatch[Msg], ServerConfig) -> @cmd.Cmd
 
-pub fn api_load_agents(@cmd.Dispatch[Msg], ServerConfig) -> @cmd.Cmd
-
 pub fn api_load_messages(@cmd.Dispatch[Msg], ServerConfig, String) -> @cmd.Cmd
-
-pub fn api_load_projects(@cmd.Dispatch[Msg], ServerConfig) -> @cmd.Cmd
 
 pub fn api_load_sessions(@cmd.Dispatch[Msg], ServerConfig) -> @cmd.Cmd
 
@@ -53,6 +49,8 @@ pub fn decode_session(Json) -> Result[Session, String]
 
 pub fn decode_sessions(Json) -> Result[Array[Session], String]
 
+pub fn empty_state(String) -> @html.Html
+
 pub fn find_agent_by_name(Array[Agent], String) -> Agent?
 
 pub fn increment_combo(GameStats) -> GameStats
@@ -61,7 +59,21 @@ pub fn increment_messages(GameStats) -> GameStats
 
 pub fn init_model(ServerConfig) -> Model
 
+pub fn load_failed(String, String) -> @html.Html
+
+pub fn loading_spinner() -> @html.Html
+
+pub fn log_error(String) -> Unit
+
 pub fn reset_combo(GameStats) -> GameStats
+
+pub fn save_base_url(String) -> Unit
+
+pub fn skeleton_agents() -> @html.Html
+
+pub fn skeleton_messages(Int) -> @html.Html
+
+pub fn skeleton_session_list(Int) -> @html.Html
 
 pub fn status_label(Model) -> String
 
@@ -90,14 +102,14 @@ pub struct Agent {
   mode : AgentMode
   color : String
   model_id : String
-  tools : Map[String, Bool]
-} derive(Show)
+  tools : Array[(String, Bool)]
+} derive(Eq, Show)
 
 pub enum AgentMode {
   Primary
   Subagent
   All
-} derive(Show)
+} derive(Eq, Show)
 
 pub struct ChatMessage {
   id : String
@@ -106,39 +118,39 @@ pub struct ChatMessage {
   parts : Array[MessagePart]
   created_at : Int
   model_id : String
-} derive(Show)
+} derive(Eq, Show)
 
 pub enum ConnectionStatus {
   Disconnected
   Connecting
   Connected
   Error(String)
-} derive(Show)
+} derive(Eq, Show)
 
 pub struct GameStats {
   total_messages : Int
   combo_streak : Int
-} derive(Show)
+} derive(Eq, Show)
 
 pub enum MessagePart {
   Text(String)
   ToolCall(ToolCallInfo)
   StepStart(String)
   StepFinish(String)
-} derive(Show)
+} derive(Eq, Show)
 
 pub enum MessageRole {
   User
   Assistant
-} derive(Show)
+} derive(Eq, Show)
 
 pub struct Model {
   config : ServerConfig
   connection : ConnectionStatus
-  projects : Array[Project]
-  sessions : Array[Session]
-  agents : Array[Agent]
-  messages : Map[String, Array[ChatMessage]]
+  projects : Status[Array[Project]]
+  sessions : Status[Array[Session]]
+  agents : Status[Array[Agent]]
+  messages : Map[String, Status[Array[ChatMessage]]]
   active_session_id : String
   active_project_id : String
   selected_agent : String
@@ -148,6 +160,7 @@ pub struct Model {
   search_query : String
   sse_connected : Bool
   stats : GameStats
+  base_url_input : String
 } derive(Show)
 
 pub enum Msg {
@@ -176,19 +189,21 @@ pub enum Msg {
   SSESessionUpdated(Session)
   SSESessionDeleted(String)
   KeyPressed(String)
+  BaseUrlChanged(String)
+  BaseUrlSubmitted
 }
 
 pub struct Project {
   id : String
   name : String
   directory : String
-} derive(Show)
+} derive(Eq, Show)
 
 pub struct ServerConfig {
   base_url : String
   username : String
   password : String
-} derive(Show)
+} derive(Eq, Show)
 
 pub struct Session {
   id : String
@@ -201,27 +216,33 @@ pub struct Session {
   agent_name : String
   is_starred : Bool
   unread_count : Int
-} derive(Show)
+} derive(Eq, Show)
 
 pub enum SessionStatus {
   Idle
   Busy
   Compacting
   Error
-} derive(Show)
+} derive(Eq, Show)
+
+pub(all) enum Status[T] {
+  Loading
+  Failed(String)
+  Success(T)
+} derive(Eq, Show)
 
 pub struct ToolCallInfo {
   tool_name : String
   input : String
   status : ToolStatus
-} derive(Show)
+} derive(Eq, Show)
 
 pub enum ToolStatus {
   Running
   Completed
   Failed
   PendingApproval
-} derive(Show)
+} derive(Eq, Show)
 
 // Type aliases
 
