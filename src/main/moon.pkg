@@ -1,0 +1,9 @@
+import {
+  "moonbit-community/rabbita",
+  "chnlkw/moonxi_board/src/types" @types,
+  "chnlkw/moonxi_board/src/page/board" @board,
+}
+
+options(
+  "is-main": true,
+)

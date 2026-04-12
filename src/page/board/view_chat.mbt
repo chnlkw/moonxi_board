@@ -45,24 +45,29 @@ pub fn view_chat(dispatch : @cmd.Dispatch[Msg], model : Model) -> @html.Html {
 ///|
 fn view_messages(model : Model) -> @html.Html {
   let session_id = model.active_session_id
-  let msgs = model.messages.get(session_id).unwrap_or([])
-  if msgs.length() == 0 {
-    div(class="messages-empty", [text("开始新对话吧 ✨")])
-  } else {
-    let bubbles = msgs.map(fn(m) { view_message_bubble(m) })
-    fragment(bubbles)
+  match model.messages.get(session_id) {
+    Some(@util.Success(msgs)) =>
+      if msgs.length() == 0 {
+        div(class="messages-empty", [text("开始新对话吧 ✨")])
+      } else {
+        let bubbles = msgs.map(fn(m) { view_message_bubble(m) })
+        fragment(bubbles)
+      }
+    Some(@util.Loading) => @view.skeleton_messages(3)
+    Some(@util.Failed(msg)) => @view.load_failed("messages", msg)
+    None => div(class="messages-empty", [text("开始新对话吧 ✨")])
   }
 }
 
 ///|
-fn view_message_bubble(msg : ChatMessage) -> @html.Html {
+fn view_message_bubble(msg : @types.ChatMessage) -> @html.Html {
   let bubble_class = match msg.role {
-    User => "bubble bubble-user"
-    Assistant => "bubble bubble-agent"
+    @types.User => "bubble bubble-user"
+    @types.Assistant => "bubble bubble-agent"
   }
   let role_label = match msg.role {
-    User => "🧑 你"
-    Assistant => "🤖 Agent"
+    @types.User => "🧑 你"
+    @types.Assistant => "🤖 Agent"
   }
   let parts_html = msg.parts.map(fn(part) { view_message_part(part) })
   div(class=bubble_class, [
@@ -72,10 +77,10 @@ fn view_message_bubble(msg : ChatMessage) -> @html.Html {
 }
 
 ///|
-fn view_message_part(part : MessagePart) -> @html.Html {
+fn view_message_part(part : @types.MessagePart) -> @html.Html {
   match part {
-    Text(content) => p([text(content)])
-    ToolCall(info) =>
+    @types.Text(content) => p([text(content)])
+    @types.ToolCall(info) =>
       details(class="tool-call", [
         summary(class="tool-call-header", [
           span(class="tool-name", [text("🔧 \{info.tool_name}")]),
@@ -83,20 +88,20 @@ fn view_message_part(part : MessagePart) -> @html.Html {
         ]),
         pre(class="tool-input", [text(info.input)]),
       ])
-    StepStart(label) =>
+    @types.StepStart(label) =>
       div(class="step-indicator step-start", [text("▶ \{label}")])
-    StepFinish(label) =>
+    @types.StepFinish(label) =>
       div(class="step-indicator step-finish", [text("✓ \{label}")])
   }
 }
 
 ///|
-fn tool_status_label(status : ToolStatus) -> String {
+fn tool_status_label(status : @types.ToolStatus) -> String {
   match status {
-    Running => "⏳ 运行中"
-    Completed => "✅ 完成"
-    Failed => "❌ 失败"
-    PendingApproval => "⚠️ 待审批"
+    @types.Running => "⏳ 运行中"
+    @types.Completed => "✅ 完成"
+    @types.Failed => "❌ 失败"
+    @types.PendingApproval => "⚠️ 待审批"
   }
 }
 
@@ -105,13 +110,19 @@ fn view_agent_selector(
   dispatch : @cmd.Dispatch[Msg],
   model : Model,
 ) -> @html.Html {
-  let options = model.agents.map(fn(agent) {
-    let is_selected = agent.name == model.selected_agent
-    option(value=agent.name, selected=is_selected, [text(agent.name)])
-  })
-  select(
-    class="agent-selector",
-    on_change=fn(name) { dispatch(AgentSelected(name)) },
-    options,
-  )
+  match model.agents {
+    @util.Success(agents) => {
+      let options = agents.map(fn(agent) {
+        let is_selected = agent.name == model.selected_agent
+        option(value=agent.name, selected=is_selected, [text(agent.name)])
+      })
+      select(
+        class="agent-selector",
+        on_change=fn(name) { dispatch(AgentSelected(name)) },
+        options,
+      )
+    }
+    @util.Loading => @view.skeleton_agents()
+    @util.Failed(msg) => @view.load_failed("agents", msg)
+  }
 }

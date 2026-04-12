@@ -67,7 +67,7 @@ test "decode_message parses real API format with info+parts" {
     Ok(m) => {
       assert_eq(m.id, "msg_123")
       assert_eq(m.session_id, "ses_abc")
-      assert_true(m.role is User)
+      assert_true(m.role is @types.User)
       assert_eq(m.parts.length(), 1)
     }
     Err(_e) => assert_true(false)
@@ -92,11 +92,11 @@ test "decode_message parses assistant message with step parts" {
   let result = decode_message(json)
   match result {
     Ok(m) => {
-      assert_true(m.role is Assistant)
+      assert_true(m.role is @types.Assistant)
       assert_eq(m.parts.length(), 3)
-      assert_true(m.parts[0] is StepStart)
-      assert_true(m.parts[1] is Text)
-      assert_true(m.parts[2] is StepFinish)
+      assert_true(m.parts[0] is @types.StepStart)
+      assert_true(m.parts[1] is @types.Text)
+      assert_true(m.parts[2] is @types.StepFinish)
     }
     Err(_e) => assert_true(false)
   }
@@ -225,7 +225,7 @@ test "decode_message parses real API response with tool/patch parts" {
   let result = decode_message(json)
   match result {
     Ok(m) => {
-      assert_true(m.role is Assistant)
+      assert_true(m.role is @types.Assistant)
       assert_eq(m.id, "msg_d78058cf6001MpNgZ3T1vPryXX")
       assert_eq(m.session_id, "ses_2c5b7cdf5ffe1dasG26wSqTkmc")
       // Should have 5 parts (step-start, reasoning->text, tool->text, step-finish, patch->text)
@@ -287,7 +287,7 @@ test "decode_message handles reasoning and tool-call parts" {
   match result {
     Ok(m) => {
       assert_eq(m.parts.length(), 3)
-      assert_true(m.parts[1] is ToolCall)
+      assert_true(m.parts[1] is @types.ToolCall)
     }
     Err(_e) => assert_true(false)
   }

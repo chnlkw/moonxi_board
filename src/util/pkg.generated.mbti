@@ -1,0 +1,18 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "chnlkw/moonxi_board/src/util"
+
+// Values
+
+// Errors
+
+// Types and methods
+pub(all) enum Status[T] {
+  Loading
+  Failed(String)
+  Success(T)
+} derive(Eq, Show)
+
+// Type aliases
+
+// Traits
+

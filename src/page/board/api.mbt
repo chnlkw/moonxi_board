@@ -5,7 +5,7 @@
 ///|
 pub fn api_health_check(
   dispatch : @cmd.Dispatch[Msg],
-  config : ServerConfig,
+  config : @types.ServerConfig,
 ) -> @cmd.Cmd {
   @http.get(
     "\{config.base_url}/global/health",
@@ -23,7 +23,7 @@ pub fn api_health_check(
 ///|
 pub fn api_load_sessions(
   dispatch : @cmd.Dispatch[Msg],
-  config : ServerConfig,
+  config : @types.ServerConfig,
 ) -> @cmd.Cmd {
   @http.get(
     "\{config.base_url}/session",
@@ -31,7 +31,7 @@ pub fn api_load_sessions(
       fn(result) {
         match result {
           Ok(json) =>
-            match decode_sessions(json) {
+            match @api.decode_sessions(json) {
               Ok(sessions) => dispatch(GotSessions(Ok(sessions)))
               Err(e) => dispatch(GotSessions(Err(e)))
             }
@@ -46,7 +46,7 @@ pub fn api_load_sessions(
 ///|
 pub fn api_create_session(
   dispatch : @cmd.Dispatch[Msg],
-  config : ServerConfig,
+  config : @types.ServerConfig,
 ) -> @cmd.Cmd {
   @http.post(
     "\{config.base_url}/session",
@@ -55,7 +55,7 @@ pub fn api_create_session(
       fn(result) {
         match result {
           Ok(json) =>
-            match decode_session(json) {
+            match @api.decode_session(json) {
               Ok(session) => dispatch(GotSessions(Ok([session])))
               Err(e) => dispatch(GotSessions(Err(e)))
             }
@@ -70,7 +70,7 @@ pub fn api_create_session(
 ///|
 pub fn api_delete_session(
   dispatch : @cmd.Dispatch[Msg],
-  config : ServerConfig,
+  config : @types.ServerConfig,
   session_id : String,
 ) -> @cmd.Cmd {
   @http.delete(
@@ -89,7 +89,7 @@ pub fn api_delete_session(
 ///|
 pub fn api_load_messages(
   dispatch : @cmd.Dispatch[Msg],
-  config : ServerConfig,
+  config : @types.ServerConfig,
   session_id : String,
 ) -> @cmd.Cmd {
   @http.get(
@@ -98,7 +98,7 @@ pub fn api_load_messages(
       fn(result) {
         match result {
           Ok(json) =>
-            match decode_messages(json) {
+            match @api.decode_messages(json) {
               Ok(messages) => dispatch(GotMessages(session_id, Ok(messages)))
               Err(e) => dispatch(GotMessages(session_id, Err(e)))
             }
@@ -113,7 +113,7 @@ pub fn api_load_messages(
 ///|
 pub fn api_send_message(
   dispatch : @cmd.Dispatch[Msg],
-  config : ServerConfig,
+  config : @types.ServerConfig,
   session_id : String,
   text : String,
   agent : String,
@@ -128,7 +128,7 @@ pub fn api_send_message(
       fn(result) {
         match result {
           Ok(json) =>
-            match decode_messages(json) {
+            match @api.decode_messages(json) {
               Ok(messages) => dispatch(MessageSent(Ok(messages)))
               Err(e) => dispatch(MessageSent(Err(e)))
             }

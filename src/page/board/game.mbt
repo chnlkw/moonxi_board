@@ -15,7 +15,7 @@ pub fn agent_icon(agent_name : String) -> String {
 }
 
 ///|
-pub fn check_achievement(stats : GameStats) -> String? {
+pub fn check_achievement(stats : @types.GameStats) -> String? {
   if stats.total_messages == 10 {
     Some("🎯 初次对话: 完成10条消息")
   } else if stats.total_messages == 50 {
@@ -30,19 +30,16 @@ pub fn check_achievement(stats : GameStats) -> String? {
 }
 
 ///|
-pub fn increment_combo(stats : GameStats) -> GameStats {
-  { ..stats, combo_streak: stats.combo_streak + 1 }
+pub fn increment_combo(stats : @types.GameStats) -> @types.GameStats {
+  @types.make_game_stats(stats.total_messages, stats.combo_streak + 1)
 }
 
 ///|
-pub fn reset_combo(stats : GameStats) -> GameStats {
-  { ..stats, combo_streak: 0 }
+pub fn reset_combo(stats : @types.GameStats) -> @types.GameStats {
+  @types.make_game_stats(stats.total_messages, 0)
 }
 
 ///|
-pub fn increment_messages(stats : GameStats) -> GameStats {
-  {
-    total_messages: stats.total_messages + 1,
-    combo_streak: stats.combo_streak + 1,
-  }
+pub fn increment_messages(stats : @types.GameStats) -> @types.GameStats {
+  @types.make_game_stats(stats.total_messages + 1, stats.combo_streak + 1)
 }

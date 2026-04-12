@@ -62,7 +62,7 @@ fn parse_sse_event(event_type : String, data : String) -> Msg? {
 /// The SSE callback dispatches messages directly via the cell's inbox.
 fn sse_subscribe(
   dispatch : @cmd.Dispatch[Msg],
-  config : ServerConfig,
+  config : @types.ServerConfig,
 ) -> @sub.Sub {
   let url = "\{config.base_url}/global/event"
   start_sse(url, fn(event_type, data) {
