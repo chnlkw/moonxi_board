@@ -31,7 +31,7 @@ fn extract_time_updated(json : Json) -> Int {
 }
 
 ///|
-pub fn decode_session(json : Json) -> Result[Session, String] {
+pub fn decode_session(json : Json) -> Result[@types.Session, String] {
   match json {
     ({
       "id": String(id),
@@ -43,18 +43,20 @@ pub fn decode_session(json : Json) -> Result[Session, String] {
     } : Json) => {
       let created_at = extract_time_created(time_json)
       let updated_at = extract_time_updated(time_json)
-      Ok({
-        id,
-        project_id: pid,
-        title,
-        directory: dir,
-        status: Idle,
-        created_at,
-        updated_at,
-        agent_name: "",
-        is_starred: false,
-        unread_count: 0,
-      })
+      Ok(
+        @types.make_session(
+          id,
+          pid,
+          title,
+          dir,
+          @types.Idle,
+          created_at,
+          updated_at,
+          "",
+          false,
+          0,
+        ),
+      )
     }
     // Fallback: try snake_case fields (old format)
     ({
@@ -66,27 +68,29 @@ pub fn decode_session(json : Json) -> Result[Session, String] {
       "updated_at": Number(ua),
       ..
     } : Json) =>
-      Ok({
-        id,
-        project_id: pid,
-        title,
-        directory: dir,
-        status: Idle,
-        created_at: ca.to_int(),
-        updated_at: ua.to_int(),
-        agent_name: "",
-        is_starred: false,
-        unread_count: 0,
-      })
+      Ok(
+        @types.make_session(
+          id,
+          pid,
+          title,
+          dir,
+          @types.Idle,
+          ca.to_int(),
+          ua.to_int(),
+          "",
+          false,
+          0,
+        ),
+      )
     _ => Err("invalid session JSON")
   }
 }
 
 ///|
-pub fn decode_sessions(json : Json) -> Result[Array[Session], String] {
+pub fn decode_sessions(json : Json) -> Result[Array[@types.Session], String] {
   match json {
     Array(items) => {
-      let results : Array[Session] = []
+      let results : Array[@types.Session] = []
       for item in items {
         match decode_session(item) {
           Ok(s) => results.push(s)
@@ -102,16 +106,16 @@ pub fn decode_sessions(json : Json) -> Result[Array[Session], String] {
 // --- Agent ---
 
 ///|
-fn decode_agent_mode(json : Json) -> AgentMode {
+fn decode_agent_mode(json : Json) -> @types.AgentMode {
   match json {
-    String("primary") => Primary
-    String("subagent") => Subagent
-    _ => All
+    String("primary") => @types.Primary
+    String("subagent") => @types.Subagent
+    _ => @types.All
   }
 }
 
 ///|
-pub fn decode_agent(json : Json) -> Result[Agent, String] {
+pub fn decode_agent(json : Json) -> Result[@types.Agent, String] {
   match json {
     ({
       "name": String(name),
@@ -123,17 +127,17 @@ pub fn decode_agent(json : Json) -> Result[Agent, String] {
     } : Json) => {
       let mode = decode_agent_mode(mode_json)
       let c = if color != "" { color } else { "#e94560" }
-      Ok({ name, description: "", mode, color: c, model_id, tools: [] })
+      Ok(@types.make_agent(name, "", mode, c, model_id, []))
     }
     _ => Err("invalid agent JSON")
   }
 }
 
 ///|
-pub fn decode_agents(json : Json) -> Result[Array[Agent], String] {
+pub fn decode_agents(json : Json) -> Result[Array[@types.Agent], String] {
   match json {
     Array(items) => {
-      let results : Array[Agent] = []
+      let results : Array[@types.Agent] = []
       for item in items {
         match decode_agent(item) {
           Ok(a) => results.push(a)
@@ -149,19 +153,19 @@ pub fn decode_agents(json : Json) -> Result[Array[Agent], String] {
 // --- Project ---
 
 ///|
-pub fn decode_project(json : Json) -> Result[Project, String] {
+pub fn decode_project(json : Json) -> Result[@types.Project, String] {
   match json {
     ({ "id": String(id), "name": String(name), "directory": String(dir), .. } : Json) =>
-      Ok({ id, name, directory: dir })
+      Ok(@types.make_project(id, name, dir))
     _ => Err("invalid project JSON")
   }
 }
 
 ///|
-pub fn decode_projects(json : Json) -> Result[Array[Project], String] {
+pub fn decode_projects(json : Json) -> Result[Array[@types.Project], String] {
   match json {
     Array(items) => {
-      let results : Array[Project] = []
+      let results : Array[@types.Project] = []
       for item in items {
         match decode_project(item) {
           Ok(p) => results.push(p)
@@ -180,38 +184,54 @@ pub fn decode_projects(json : Json) -> Result[Array[Project], String] {
 // parts: [{"type":"text","text":"..."}, {"type":"step-start","snapshot":"..."}, {"type":"step-finish","reason":"..."}, {"type":"reasoning","text":"..."}, {"type":"tool-call",...}]
 
 ///|
-fn decode_message_part(json : Json) -> Result[MessagePart, String] {
+fn decode_message_part(json : Json) -> Result[@types.MessagePart, String] {
   match json {
     ({ "type": String("text"), "text": String(str), .. } : Json) =>
-      Ok(Text(str))
+      Ok(@types.Text(str))
     ({
       "type": String("tool_call"),
       "tool_name": String(name),
       "input": String(input),
       ..
-    } : Json) => Ok(ToolCall({ tool_name: name, input, status: Completed }))
+    } : Json) =>
+      Ok(
+        @types.ToolCall(
+          @types.make_tool_call_info(name, input, @types.Completed),
+        ),
+      )
     ({
       "type": String("tool-call"),
       "name": String(name),
       "input": String(input),
       ..
-    } : Json) => Ok(ToolCall({ tool_name: name, input, status: Completed }))
-    ({ "type": String("step-start"), .. } : Json) => Ok(StepStart("step"))
-    ({ "type": String("step-finish"), .. } : Json) => Ok(StepFinish("step"))
+    } : Json) =>
+      Ok(
+        @types.ToolCall(
+          @types.make_tool_call_info(name, input, @types.Completed),
+        ),
+      )
+    ({ "type": String("step-start"), .. } : Json) =>
+      Ok(@types.StepStart("step"))
+    ({ "type": String("step-finish"), .. } : Json) =>
+      Ok(@types.StepFinish("step"))
     ({ "type": String("reasoning"), .. } : Json) =>
-      Ok(Text("💭 reasoning..."))
+      Ok(@types.Text("💭 reasoning..."))
     // Real API: type "tool" with nested state object
     ({ "type": String("tool"), "tool": String(name), .. } : Json) =>
-      Ok(ToolCall({ tool_name: name, input: "(tool call)", status: Completed }))
+      Ok(
+        @types.ToolCall(
+          @types.make_tool_call_info(name, "(tool call)", @types.Completed),
+        ),
+      )
     // Real API: type "patch" (file changes)
-    ({ "type": String("patch"), .. } : Json) => Ok(Text(""))
+    ({ "type": String("patch"), .. } : Json) => Ok(@types.Text(""))
     // Skip unknown types
-    _ => Ok(Text(""))
+    _ => Ok(@types.Text(""))
   }
 }
 
 ///|
-pub fn decode_message(json : Json) -> Result[ChatMessage, String] {
+pub fn decode_message(json : Json) -> Result[@types.ChatMessage, String] {
   match json {
     // Real OpenCode Serve format: info + parts at top level
     ({
@@ -226,19 +246,19 @@ pub fn decode_message(json : Json) -> Result[ChatMessage, String] {
       ..
     } : Json) => {
       let role = match role_str {
-        "user" => User
-        "assistant" => Assistant
-        _ => User
+        "user" => @types.User
+        "assistant" => @types.Assistant
+        _ => @types.User
       }
       let created_at = extract_time_created(time_json)
-      let parts : Array[MessagePart] = []
+      let parts : Array[@types.MessagePart] = []
       for p in parts_json {
         match decode_message_part(p) {
           Ok(part) => parts.push(part)
           Err(_) => () // skip invalid parts
         }
       }
-      Ok({ id: mid, session_id: sid, role, parts, created_at, model_id: "" })
+      Ok(@types.make_chat_message(mid, sid, role, parts, created_at, ""))
     }
     // Fallback: flat format
     ({
@@ -248,28 +268,30 @@ pub fn decode_message(json : Json) -> Result[ChatMessage, String] {
       ..
     } : Json) => {
       let role = match role_str {
-        "user" => User
-        "assistant" => Assistant
-        _ => User
+        "user" => @types.User
+        "assistant" => @types.Assistant
+        _ => @types.User
       }
-      let parts : Array[MessagePart] = []
+      let parts : Array[@types.MessagePart] = []
       for p in parts_json {
         match decode_message_part(p) {
           Ok(part) => parts.push(part)
           Err(_) => ()
         }
       }
-      Ok({ id, session_id: "", role, parts, created_at: 0, model_id: "" })
+      Ok(@types.make_chat_message(id, "", role, parts, 0, ""))
     }
     _ => Err("invalid message JSON")
   }
 }
 
 ///|
-pub fn decode_messages(json : Json) -> Result[Array[ChatMessage], String] {
+pub fn decode_messages(
+  json : Json,
+) -> Result[Array[@types.ChatMessage], String] {
   match json {
     Array(items) => {
-      let results : Array[ChatMessage] = []
+      let results : Array[@types.ChatMessage] = []
       for item in items {
         match decode_message(item) {
           Ok(m) => results.push(m)

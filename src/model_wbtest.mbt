@@ -1,12 +1,10 @@
 ///|
 test "init_model has correct defaults" {
-  let config = {
-    base_url: "http://localhost:4096",
-    username: "opencode",
-    password: "",
-  }
+  let config = @types.make_server_config(
+    "http://localhost:4096", "opencode", "",
+  )
   let model = init_model(config)
-  assert_true(model.connection is Disconnected)
+  assert_true(model.connection is @types.Disconnected)
   assert_true(model.projects is Success(_))
   assert_true(model.sessions is Loading)
   assert_true(model.agents is Success(_))
@@ -25,11 +23,7 @@ test "init_model has correct defaults" {
 
 ///|
 test "init_model stores config" {
-  let config = {
-    base_url: "http://example.com",
-    username: "user",
-    password: "pass",
-  }
+  let config = @types.make_server_config("http://example.com", "user", "pass")
   let model = init_model(config)
   assert_eq(model.config.base_url, "http://example.com")
   assert_eq(model.config.username, "user")

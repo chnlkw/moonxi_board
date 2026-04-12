@@ -5,7 +5,7 @@
 ///|
 pub fn api_health_check(
   dispatch : @cmd.Dispatch[Msg],
-  config : ServerConfig,
+  config : @types.ServerConfig,
 ) -> @cmd.Cmd {
   @http.get(
     "\{config.base_url}/global/health",
@@ -23,7 +23,7 @@ pub fn api_health_check(
 ///|
 pub fn api_load_sessions(
   dispatch : @cmd.Dispatch[Msg],
-  config : ServerConfig,
+  config : @types.ServerConfig,
 ) -> @cmd.Cmd {
   @http.get(
     "\{config.base_url}/session",
@@ -46,7 +46,7 @@ pub fn api_load_sessions(
 ///|
 pub fn api_create_session(
   dispatch : @cmd.Dispatch[Msg],
-  config : ServerConfig,
+  config : @types.ServerConfig,
 ) -> @cmd.Cmd {
   @http.post(
     "\{config.base_url}/session",
@@ -70,7 +70,7 @@ pub fn api_create_session(
 ///|
 pub fn api_delete_session(
   dispatch : @cmd.Dispatch[Msg],
-  config : ServerConfig,
+  config : @types.ServerConfig,
   session_id : String,
 ) -> @cmd.Cmd {
   @http.delete(
@@ -89,7 +89,7 @@ pub fn api_delete_session(
 ///|
 pub fn api_load_messages(
   dispatch : @cmd.Dispatch[Msg],
-  config : ServerConfig,
+  config : @types.ServerConfig,
   session_id : String,
 ) -> @cmd.Cmd {
   @http.get(
@@ -113,7 +113,7 @@ pub fn api_load_messages(
 ///|
 pub fn api_send_message(
   dispatch : @cmd.Dispatch[Msg],
-  config : ServerConfig,
+  config : @types.ServerConfig,
   session_id : String,
   text : String,
   agent : String,

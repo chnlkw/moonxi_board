@@ -40,10 +40,24 @@ pub fn save_base_url(url : String) -> Unit {
 }
 
 ///|
-pub fn toggle_star(sessions : Array[Session], id : String) -> Array[Session] {
+pub fn toggle_star(
+  sessions : Array[@types.Session],
+  id : String,
+) -> Array[@types.Session] {
   sessions.map(fn(s) {
     if s.id == id {
-      { ..s, is_starred: !s.is_starred }
+      @types.make_session(
+        s.id,
+        s.project_id,
+        s.title,
+        s.directory,
+        s.status,
+        s.created_at,
+        s.updated_at,
+        s.agent_name,
+        !s.is_starred,
+        s.unread_count,
+      )
     } else {
       s
     }
@@ -52,26 +66,43 @@ pub fn toggle_star(sessions : Array[Session], id : String) -> Array[Session] {
 
 ///|
 pub fn update_session(
-  sessions : Array[Session],
-  updated : Session,
-) -> Array[Session] {
+  sessions : Array[@types.Session],
+  updated : @types.Session,
+) -> Array[@types.Session] {
   sessions.map(fn(s) { if s.id == updated.id { updated } else { s } })
 }
 
 ///|
 pub fn update_session_status(
-  sessions : Array[Session],
+  sessions : Array[@types.Session],
   id : String,
-  status : SessionStatus,
-) -> Array[Session] {
-  sessions.map(fn(s) { if s.id == id { { ..s, status, } } else { s } })
+  status : @types.SessionStatus,
+) -> Array[@types.Session] {
+  sessions.map(fn(s) {
+    if s.id == id {
+      @types.make_session(
+        s.id,
+        s.project_id,
+        s.title,
+        s.directory,
+        status,
+        s.created_at,
+        s.updated_at,
+        s.agent_name,
+        s.is_starred,
+        s.unread_count,
+      )
+    } else {
+      s
+    }
+  })
 }
 
 ///|
 pub fn append_message(
   model : Model,
   session_id : String,
-  msg : ChatMessage,
+  msg : @types.ChatMessage,
 ) -> Model {
   match model.messages.get(session_id) {
     Some(Success(existing)) => {
@@ -101,7 +132,10 @@ pub fn active_session_title(model : Model) -> String {
 }
 
 ///|
-pub fn find_agent_by_name(agents : Array[Agent], name : String) -> Agent? {
+pub fn find_agent_by_name(
+  agents : Array[@types.Agent],
+  name : String,
+) -> @types.Agent? {
   let found = agents.filter(fn(a) { a.name == name })
   if found.length() > 0 {
     Some(found[0])
@@ -111,21 +145,21 @@ pub fn find_agent_by_name(agents : Array[Agent], name : String) -> Agent? {
 }
 
 ///|
-pub fn connection_label(conn : ConnectionStatus) -> String {
+pub fn connection_label(conn : @types.ConnectionStatus) -> String {
   match conn {
-    Disconnected => "○ Disconnected"
-    Connecting => "◐ Connecting"
-    Connected => "● Connected"
-    Error(msg) => "✗ \{msg}"
+    @types.Disconnected => "○ Disconnected"
+    @types.Connecting => "◐ Connecting"
+    @types.Connected => "● Connected"
+    @types.Error(msg) => "✗ \{msg}"
   }
 }
 
 ///|
-pub fn agent_mode_label(mode : AgentMode) -> String {
+pub fn agent_mode_label(mode : @types.AgentMode) -> String {
   match mode {
-    Primary => "Primary"
-    Subagent => "Subagent"
-    All => "All"
+    @types.Primary => "Primary"
+    @types.Subagent => "Subagent"
+    @types.All => "All"
   }
 }
 

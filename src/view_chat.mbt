@@ -60,14 +60,14 @@ fn view_messages(model : Model) -> @html.Html {
 }
 
 ///|
-fn view_message_bubble(msg : ChatMessage) -> @html.Html {
+fn view_message_bubble(msg : @types.ChatMessage) -> @html.Html {
   let bubble_class = match msg.role {
-    User => "bubble bubble-user"
-    Assistant => "bubble bubble-agent"
+    @types.User => "bubble bubble-user"
+    @types.Assistant => "bubble bubble-agent"
   }
   let role_label = match msg.role {
-    User => "🧑 你"
-    Assistant => "🤖 Agent"
+    @types.User => "🧑 你"
+    @types.Assistant => "🤖 Agent"
   }
   let parts_html = msg.parts.map(fn(part) { view_message_part(part) })
   div(class=bubble_class, [
@@ -77,10 +77,10 @@ fn view_message_bubble(msg : ChatMessage) -> @html.Html {
 }
 
 ///|
-fn view_message_part(part : MessagePart) -> @html.Html {
+fn view_message_part(part : @types.MessagePart) -> @html.Html {
   match part {
-    Text(content) => p([text(content)])
-    ToolCall(info) =>
+    @types.Text(content) => p([text(content)])
+    @types.ToolCall(info) =>
       details(class="tool-call", [
         summary(class="tool-call-header", [
           span(class="tool-name", [text("🔧 \{info.tool_name}")]),
@@ -88,20 +88,20 @@ fn view_message_part(part : MessagePart) -> @html.Html {
         ]),
         pre(class="tool-input", [text(info.input)]),
       ])
-    StepStart(label) =>
+    @types.StepStart(label) =>
       div(class="step-indicator step-start", [text("▶ \{label}")])
-    StepFinish(label) =>
+    @types.StepFinish(label) =>
       div(class="step-indicator step-finish", [text("✓ \{label}")])
   }
 }
 
 ///|
-fn tool_status_label(status : ToolStatus) -> String {
+fn tool_status_label(status : @types.ToolStatus) -> String {
   match status {
-    Running => "⏳ 运行中"
-    Completed => "✅ 完成"
-    Failed => "❌ 失败"
-    PendingApproval => "⚠️ 待审批"
+    @types.Running => "⏳ 运行中"
+    @types.Completed => "✅ 完成"
+    @types.Failed => "❌ 失败"
+    @types.PendingApproval => "⚠️ 待审批"
   }
 }
 

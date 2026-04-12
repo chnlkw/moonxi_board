@@ -66,7 +66,7 @@ fn view_session_groups(
 fn view_session_item(
   dispatch : @cmd.Dispatch[Msg],
   model : Model,
-  s : Session,
+  s : @types.Session,
 ) -> @html.Html {
   let active = s.id == model.active_session_id
   let item_class = if active { "session-item active" } else { "session-item" }
@@ -93,7 +93,10 @@ fn view_session_item(
 }
 
 ///|
-fn filter_sessions(sessions : Array[Session], query : String) -> Array[Session] {
+fn filter_sessions(
+  sessions : Array[@types.Session],
+  query : String,
+) -> Array[@types.Session] {
   if query.length() == 0 {
     sessions
   } else {
@@ -104,7 +107,7 @@ fn filter_sessions(sessions : Array[Session], query : String) -> Array[Session] 
 }
 
 ///|
-fn unique_project_ids(sessions : Array[Session]) -> Array[String] {
+fn unique_project_ids(sessions : Array[@types.Session]) -> Array[String] {
   let ids : Array[String] = []
   sessions.each(fn(s) {
     if !ids.contains(s.project_id) {
@@ -115,7 +118,7 @@ fn unique_project_ids(sessions : Array[Session]) -> Array[String] {
 }
 
 ///|
-fn find_project_name(projects : Array[Project], pid : String) -> String {
+fn find_project_name(projects : Array[@types.Project], pid : String) -> String {
   let found = projects.filter(fn(p) { p.id == pid })
   if found.length() > 0 {
     found[0].name
@@ -125,11 +128,11 @@ fn find_project_name(projects : Array[Project], pid : String) -> String {
 }
 
 ///|
-fn session_status_icon(status : SessionStatus) -> String {
+fn session_status_icon(status : @types.SessionStatus) -> String {
   match status {
-    Idle => "🟢"
-    Busy => "🟡"
-    Compacting => "🔵"
-    Error => "🔴"
+    @types.Idle => "🟢"
+    @types.Busy => "🟡"
+    @types.Compacting => "🔵"
+    @types.Error => "🔴"
   }
 }
