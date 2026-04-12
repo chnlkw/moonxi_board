@@ -15,24 +15,29 @@ pub fn update(
     GotHealth(Ok(_)) => (@cmd.none, { ..model, connection: Connected })
     GotHealth(Err(_)) =>
       (@cmd.none, { ..model, connection: Error("health check failed") })
-    GotSessions(Ok(sessions)) => (@cmd.none, { ..model, sessions, })
-    GotSessions(Err(_)) => (@cmd.none, model)
-    GotAgents(Ok(agents)) => (@cmd.none, { ..model, agents, })
-    GotAgents(Err(_)) => (@cmd.none, model)
-    GotProjects(Ok(projects)) => (@cmd.none, { ..model, projects, })
-    GotProjects(Err(_)) => (@cmd.none, model)
+    GotSessions(Ok(sessions)) =>
+      (@cmd.none, { ..model, sessions: Success(sessions) })
+    GotSessions(Err(msg)) => {
+      println(msg)
+      (@cmd.none, { ..model, sessions: Failed(msg) })
+    }
+    GotAgents(Ok(agents)) => (@cmd.none, { ..model, agents: Success(agents) })
+    GotAgents(Err(msg)) => (@cmd.none, { ..model, agents: Failed(msg) })
+    GotProjects(Ok(projects)) =>
+      (@cmd.none, { ..model, projects: Success(projects) })
+    GotProjects(Err(msg)) => (@cmd.none, { ..model, projects: Failed(msg) })
     SelectSession(id) => {
+      let _ = model.messages.set(id, Loading)
       let cmd = api_load_messages(dispatch, model.config, id)
-      (cmd, { ..model, active_session_id: id })
+      (cmd, { ..model, active_session_id: id, messages: model.messages })
     }
     GotMessages(sid, Ok(messages)) => {
-      let _ = model.messages.set(sid, messages)
+      let _ = model.messages.set(sid, Success(messages))
       (@cmd.none, { ..model, messages: model.messages })
     }
-    GotMessages(sid, Err(e)) => {
-      // Log decode error for debugging (visible in browser console)
-      let _ = log_error("decode_messages[\{sid}]: \{e}")
-      (@cmd.none, model)
+    GotMessages(sid, Err(msg)) => {
+      let _ = model.messages.set(sid, Failed(msg))
+      (@cmd.none, { ..model, messages: model.messages })
     }
     NewSessionClicked => {
       let cmd = api_create_session(dispatch, model.config)
@@ -54,16 +59,27 @@ pub fn update(
       }
     MessageSent(Ok(messages)) => {
       let sid = model.active_session_id
-      let existing = model.messages.get(sid).unwrap_or([])
-      let _ = model.messages.set(sid, existing + messages)
-      (@cmd.none, { ..model, messages: model.messages })
+      match model.messages.get(sid) {
+        Some(Success(existing)) => {
+          let _ = model.messages.set(sid, Success(existing + messages))
+          (@cmd.none, { ..model, messages: model.messages })
+        }
+        _ => {
+          let _ = model.messages.set(sid, Success(messages))
+          (@cmd.none, { ..model, messages: model.messages })
+        }
+      }
     }
     MessageSent(Err(_)) => (@cmd.none, model)
     AgentSelected(name) => (@cmd.none, { ..model, selected_agent: name })
     ProjectSelected(id) => (@cmd.none, { ..model, active_project_id: id })
     SearchInputChanged(query) => (@cmd.none, { ..model, search_query: query })
     StarSession(id) =>
-      (@cmd.none, { ..model, sessions: toggle_star(model.sessions, id) })
+      match model.sessions {
+        Success(sessions) =>
+          (@cmd.none, { ..model, sessions: Success(toggle_star(sessions, id)) })
+        _ => (@cmd.none, model)
+      }
     DeleteSession(id) => {
       let cmd = api_delete_session(dispatch, model.config, id)
       (cmd, model)
@@ -73,14 +89,32 @@ pub fn update(
     SSEConnected => (@cmd.none, { ..model, sse_connected: true })
     SSEDisconnected => (@cmd.none, { ..model, sse_connected: false })
     SSESessionCreated(s) =>
-      (@cmd.none, { ..model, sessions: model.sessions + [s] })
+      match model.sessions {
+        Success(sessions) =>
+          (@cmd.none, { ..model, sessions: Success(sessions + [s]) })
+        Loading | Failed(_) => (@cmd.none, { ..model, sessions: Success([s]) })
+      }
     SSESessionUpdated(s) =>
-      (@cmd.none, { ..model, sessions: update_session(model.sessions, s) })
+      match model.sessions {
+        Success(sessions) =>
+          (
+            @cmd.none,
+            { ..model, sessions: Success(update_session(sessions, s)) },
+          )
+        _ => (@cmd.none, model)
+      }
     SSESessionDeleted(id) =>
-      (
-        @cmd.none,
-        { ..model, sessions: model.sessions.filter(fn(s) { s.id != id }) },
-      )
+      match model.sessions {
+        Success(sessions) =>
+          (
+            @cmd.none,
+            {
+              ..model,
+              sessions: Success(sessions.filter(fn(s) { s.id != id })),
+            },
+          )
+        _ => (@cmd.none, model)
+      }
     SSEMessageUpdated(sid, msg) => (@cmd.none, append_message(model, sid, msg))
     KeyPressed(_key) => (@cmd.none, model)
     BaseUrlChanged(text) => (@cmd.none, { ..model, base_url_input: text })

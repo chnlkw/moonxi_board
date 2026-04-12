@@ -45,12 +45,17 @@ pub fn view_chat(dispatch : @cmd.Dispatch[Msg], model : Model) -> @html.Html {
 ///|
 fn view_messages(model : Model) -> @html.Html {
   let session_id = model.active_session_id
-  let msgs = model.messages.get(session_id).unwrap_or([])
-  if msgs.length() == 0 {
-    div(class="messages-empty", [text("开始新对话吧 ✨")])
-  } else {
-    let bubbles = msgs.map(fn(m) { view_message_bubble(m) })
-    fragment(bubbles)
+  match model.messages.get(session_id) {
+    Some(Success(msgs)) =>
+      if msgs.length() == 0 {
+        div(class="messages-empty", [text("开始新对话吧 ✨")])
+      } else {
+        let bubbles = msgs.map(fn(m) { view_message_bubble(m) })
+        fragment(bubbles)
+      }
+    Some(Loading) => skeleton_messages(3)
+    Some(Failed(msg)) => load_failed("messages", msg)
+    None => div(class="messages-empty", [text("开始新对话吧 ✨")])
   }
 }
 
@@ -105,13 +110,19 @@ fn view_agent_selector(
   dispatch : @cmd.Dispatch[Msg],
   model : Model,
 ) -> @html.Html {
-  let options = model.agents.map(fn(agent) {
-    let is_selected = agent.name == model.selected_agent
-    option(value=agent.name, selected=is_selected, [text(agent.name)])
-  })
-  select(
-    class="agent-selector",
-    on_change=fn(name) { dispatch(AgentSelected(name)) },
-    options,
-  )
+  match model.agents {
+    Success(agents) => {
+      let options = agents.map(fn(agent) {
+        let is_selected = agent.name == model.selected_agent
+        option(value=agent.name, selected=is_selected, [text(agent.name)])
+      })
+      select(
+        class="agent-selector",
+        on_change=fn(name) { dispatch(AgentSelected(name)) },
+        options,
+      )
+    }
+    Loading => skeleton_agents()
+    Failed(msg) => load_failed("agents", msg)
+  }
 }

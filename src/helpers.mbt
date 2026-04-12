@@ -73,18 +73,30 @@ pub fn append_message(
   session_id : String,
   msg : ChatMessage,
 ) -> Model {
-  let existing = model.messages.get(session_id).unwrap_or([])
-  let _ = model.messages.set(session_id, existing + [msg])
-  { ..model, messages: model.messages }
+  match model.messages.get(session_id) {
+    Some(Success(existing)) => {
+      let _ = model.messages.set(session_id, Success(existing + [msg]))
+      { ..model, messages: model.messages }
+    }
+    _ => {
+      let _ = model.messages.set(session_id, Success([msg]))
+      { ..model, messages: model.messages }
+    }
+  }
 }
 
 ///|
 pub fn active_session_title(model : Model) -> String {
-  let found = model.sessions.filter(fn(s) { s.id == model.active_session_id })
-  if found.length() > 0 {
-    found[0].title
-  } else {
-    "No session"
+  match model.sessions {
+    Success(sessions) => {
+      let found = sessions.filter(fn(s) { s.id == model.active_session_id })
+      if found.length() > 0 {
+        found[0].title
+      } else {
+        "No session"
+      }
+    }
+    Loading | Failed(_) => "No session"
   }
 }
 
@@ -120,5 +132,15 @@ pub fn agent_mode_label(mode : AgentMode) -> String {
 ///|
 pub fn status_label(model : Model) -> String {
   let conn = connection_label(model.connection)
-  "\{conn} | Sessions: \{model.sessions.length()} | Agents: \{model.agents.length()}"
+  let session_count = match model.sessions {
+    Success(s) => "\{s.length()}"
+    Loading => "Loading..."
+    Failed(_) => "Error"
+  }
+  let agent_count = match model.agents {
+    Success(a) => "\{a.length()}"
+    Loading => "Loading..."
+    Failed(_) => "Error"
+  }
+  "\{conn} | Sessions: \{session_count} | Agents: \{agent_count}"
 }

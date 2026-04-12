@@ -29,34 +29,39 @@ pub fn view_detail(dispatch : @cmd.Dispatch[Msg], model : Model) -> @html.Html {
 
 ///|
 fn view_agent_detail(model : Model) -> @html.Html {
-  match find_agent_by_name(model.agents, model.selected_agent) {
-    Some(agent) =>
-      div(class="agent-detail", [
-        div(class="agent-info-section", [
-          h4([text("基本信息")]),
-          div(class="info-row", [
-            span(class="info-label", [text("名称:")]),
-            span(class="info-value", [text(agent.name)]),
-          ]),
-          div(class="info-row", [
-            span(class="info-label", [text("模式:")]),
-            span(class="info-value", [text(agent_mode_label(agent.mode))]),
-          ]),
-          div(class="info-row", [
-            span(class="info-label", [text("模型:")]),
-            span(class="info-value", [text(agent.model_id)]),
-          ]),
-          p(class="agent-desc", [text(agent.description)]),
-        ]),
-        div(class="agent-tools-section", [
-          h4([text("工具权限")]),
-          view_tools_list(agent.tools),
-        ]),
-      ])
-    None =>
-      div(class="agent-detail agent-detail-empty", [
-        p([text("选择一个 Agent 查看详情")]),
-      ])
+  match model.agents {
+    Success(agents) =>
+      match find_agent_by_name(agents, model.selected_agent) {
+        Some(agent) =>
+          div(class="agent-detail", [
+            div(class="agent-info-section", [
+              h4([text("基本信息")]),
+              div(class="info-row", [
+                span(class="info-label", [text("名称:")]),
+                span(class="info-value", [text(agent.name)]),
+              ]),
+              div(class="info-row", [
+                span(class="info-label", [text("模式:")]),
+                span(class="info-value", [text(agent_mode_label(agent.mode))]),
+              ]),
+              div(class="info-row", [
+                span(class="info-label", [text("模型:")]),
+                span(class="info-value", [text(agent.model_id)]),
+              ]),
+              p(class="agent-desc", [text(agent.description)]),
+            ]),
+            div(class="agent-tools-section", [
+              h4([text("工具权限")]),
+              view_tools_list(agent.tools),
+            ]),
+          ])
+        None =>
+          div(class="agent-detail agent-detail-empty", [
+            p([text("选择一个 Agent 查看详情")]),
+          ])
+      }
+    Loading => skeleton_agents()
+    Failed(msg) => load_failed("agents", msg)
   }
 }
 

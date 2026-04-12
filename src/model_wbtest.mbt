@@ -7,9 +7,9 @@ test "init_model has correct defaults" {
   }
   let model = init_model(config)
   assert_true(model.connection is Disconnected)
-  assert_eq(model.projects.length(), 0)
-  assert_eq(model.sessions.length(), 0)
-  assert_eq(model.agents.length(), 0)
+  assert_true(model.projects is Success(_))
+  assert_true(model.sessions is Loading)
+  assert_true(model.agents is Success(_))
   assert_eq(model.active_session_id, "")
   assert_eq(model.active_project_id, "")
   assert_eq(model.selected_agent, "")

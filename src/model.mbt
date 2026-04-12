@@ -124,10 +124,10 @@ pub struct GameStats {
 pub struct Model {
   config : ServerConfig
   connection : ConnectionStatus
-  projects : Array[Project]
-  sessions : Array[Session]
-  agents : Array[Agent]
-  messages : Map[String, Array[ChatMessage]]
+  projects : Status[Array[Project]]
+  sessions : Status[Array[Session]]
+  agents : Status[Array[Agent]]
+  messages : Map[String, Status[Array[ChatMessage]]]
   active_session_id : String
   active_project_id : String
   selected_agent : String
@@ -180,9 +180,9 @@ pub fn init_model(config : ServerConfig) -> Model {
   {
     config,
     connection: Disconnected,
-    projects: [],
-    sessions: [],
-    agents: [],
+    projects: Success([]),
+    sessions: Loading,
+    agents: Success([]),
     messages: {},
     active_session_id: "",
     active_project_id: "",
