@@ -1,5 +1,4 @@
 import {
-  "moonbit-community/rabbita",
   "moonbit-community/rabbita/html",
   "moonbit-community/rabbita/http",
   "moonbit-community/rabbita/cmd",
