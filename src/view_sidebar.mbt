@@ -38,12 +38,12 @@ fn view_session_groups(
   model : Model,
 ) -> @html.Html {
   match model.sessions {
-    Success(sessions) => {
+    @util.Success(sessions) => {
       let filtered = filter_sessions(sessions, model.search_query)
       let project_ids = unique_project_ids(filtered)
       let groups = project_ids.map(fn(pid) {
         let project_name = match model.projects {
-          Success(projects) => find_project_name(projects, pid)
+          @util.Success(projects) => find_project_name(projects, pid)
           _ => pid
         }
         let group_sessions = filtered.filter(fn(s) { s.project_id == pid })
@@ -57,8 +57,8 @@ fn view_session_groups(
       })
       fragment(groups)
     }
-    Loading => skeleton_session_list(5)
-    Failed(msg) => load_failed("sessions", msg)
+    @util.Loading => skeleton_session_list(5)
+    @util.Failed(msg) => load_failed("sessions", msg)
   }
 }
 

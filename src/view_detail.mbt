@@ -30,7 +30,7 @@ pub fn view_detail(dispatch : @cmd.Dispatch[Msg], model : Model) -> @html.Html {
 ///|
 fn view_agent_detail(model : Model) -> @html.Html {
   match model.agents {
-    Success(agents) =>
+    @util.Success(agents) =>
       match find_agent_by_name(agents, model.selected_agent) {
         Some(agent) =>
           div(class="agent-detail", [
@@ -60,8 +60,8 @@ fn view_agent_detail(model : Model) -> @html.Html {
             p([text("选择一个 Agent 查看详情")]),
           ])
       }
-    Loading => skeleton_agents()
-    Failed(msg) => load_failed("agents", msg)
+    @util.Loading => skeleton_agents()
+    @util.Failed(msg) => load_failed("agents", msg)
   }
 }
 

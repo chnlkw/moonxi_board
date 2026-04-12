@@ -16,27 +16,29 @@ pub fn update(
     GotHealth(Err(_)) =>
       (@cmd.none, { ..model, connection: Error("health check failed") })
     GotSessions(Ok(sessions)) =>
-      (@cmd.none, { ..model, sessions: Success(sessions) })
+      (@cmd.none, { ..model, sessions: @util.Success(sessions) })
     GotSessions(Err(msg)) => {
       println(msg)
-      (@cmd.none, { ..model, sessions: Failed(msg) })
+      (@cmd.none, { ..model, sessions: @util.Failed(msg) })
     }
-    GotAgents(Ok(agents)) => (@cmd.none, { ..model, agents: Success(agents) })
-    GotAgents(Err(msg)) => (@cmd.none, { ..model, agents: Failed(msg) })
+    GotAgents(Ok(agents)) =>
+      (@cmd.none, { ..model, agents: @util.Success(agents) })
+    GotAgents(Err(msg)) => (@cmd.none, { ..model, agents: @util.Failed(msg) })
     GotProjects(Ok(projects)) =>
-      (@cmd.none, { ..model, projects: Success(projects) })
-    GotProjects(Err(msg)) => (@cmd.none, { ..model, projects: Failed(msg) })
+      (@cmd.none, { ..model, projects: @util.Success(projects) })
+    GotProjects(Err(msg)) =>
+      (@cmd.none, { ..model, projects: @util.Failed(msg) })
     SelectSession(id) => {
-      let _ = model.messages.set(id, Loading)
+      let _ = model.messages.set(id, @util.Loading)
       let cmd = api_load_messages(dispatch, model.config, id)
       (cmd, { ..model, active_session_id: id, messages: model.messages })
     }
     GotMessages(sid, Ok(messages)) => {
-      let _ = model.messages.set(sid, Success(messages))
+      let _ = model.messages.set(sid, @util.Success(messages))
       (@cmd.none, { ..model, messages: model.messages })
     }
     GotMessages(sid, Err(msg)) => {
-      let _ = model.messages.set(sid, Failed(msg))
+      let _ = model.messages.set(sid, @util.Failed(msg))
       (@cmd.none, { ..model, messages: model.messages })
     }
     NewSessionClicked => {
@@ -60,12 +62,12 @@ pub fn update(
     MessageSent(Ok(messages)) => {
       let sid = model.active_session_id
       match model.messages.get(sid) {
-        Some(Success(existing)) => {
-          let _ = model.messages.set(sid, Success(existing + messages))
+        Some(@util.Success(existing)) => {
+          let _ = model.messages.set(sid, @util.Success(existing + messages))
           (@cmd.none, { ..model, messages: model.messages })
         }
         _ => {
-          let _ = model.messages.set(sid, Success(messages))
+          let _ = model.messages.set(sid, @util.Success(messages))
           (@cmd.none, { ..model, messages: model.messages })
         }
       }
@@ -76,8 +78,11 @@ pub fn update(
     SearchInputChanged(query) => (@cmd.none, { ..model, search_query: query })
     StarSession(id) =>
       match model.sessions {
-        Success(sessions) =>
-          (@cmd.none, { ..model, sessions: Success(toggle_star(sessions, id)) })
+        @util.Success(sessions) =>
+          (
+            @cmd.none,
+            { ..model, sessions: @util.Success(toggle_star(sessions, id)) },
+          )
         _ => (@cmd.none, model)
       }
     DeleteSession(id) => {
@@ -90,27 +95,28 @@ pub fn update(
     SSEDisconnected => (@cmd.none, { ..model, sse_connected: false })
     SSESessionCreated(s) =>
       match model.sessions {
-        Success(sessions) =>
-          (@cmd.none, { ..model, sessions: Success(sessions + [s]) })
-        Loading | Failed(_) => (@cmd.none, { ..model, sessions: Success([s]) })
+        @util.Success(sessions) =>
+          (@cmd.none, { ..model, sessions: @util.Success(sessions + [s]) })
+        @util.Loading | @util.Failed(_) =>
+          (@cmd.none, { ..model, sessions: @util.Success([s]) })
       }
     SSESessionUpdated(s) =>
       match model.sessions {
-        Success(sessions) =>
+        @util.Success(sessions) =>
           (
             @cmd.none,
-            { ..model, sessions: Success(update_session(sessions, s)) },
+            { ..model, sessions: @util.Success(update_session(sessions, s)) },
           )
         _ => (@cmd.none, model)
       }
     SSESessionDeleted(id) =>
       match model.sessions {
-        Success(sessions) =>
+        @util.Success(sessions) =>
           (
             @cmd.none,
             {
               ..model,
-              sessions: Success(sessions.filter(fn(s) { s.id != id })),
+              sessions: @util.Success(sessions.filter(fn(s) { s.id != id })),
             },
           )
         _ => (@cmd.none, model)

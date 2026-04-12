@@ -46,15 +46,15 @@ pub fn view_chat(dispatch : @cmd.Dispatch[Msg], model : Model) -> @html.Html {
 fn view_messages(model : Model) -> @html.Html {
   let session_id = model.active_session_id
   match model.messages.get(session_id) {
-    Some(Success(msgs)) =>
+    Some(@util.Success(msgs)) =>
       if msgs.length() == 0 {
         div(class="messages-empty", [text("开始新对话吧 ✨")])
       } else {
         let bubbles = msgs.map(fn(m) { view_message_bubble(m) })
         fragment(bubbles)
       }
-    Some(Loading) => skeleton_messages(3)
-    Some(Failed(msg)) => load_failed("messages", msg)
+    Some(@util.Loading) => skeleton_messages(3)
+    Some(@util.Failed(msg)) => load_failed("messages", msg)
     None => div(class="messages-empty", [text("开始新对话吧 ✨")])
   }
 }
@@ -111,7 +111,7 @@ fn view_agent_selector(
   model : Model,
 ) -> @html.Html {
   match model.agents {
-    Success(agents) => {
+    @util.Success(agents) => {
       let options = agents.map(fn(agent) {
         let is_selected = agent.name == model.selected_agent
         option(value=agent.name, selected=is_selected, [text(agent.name)])
@@ -122,7 +122,7 @@ fn view_agent_selector(
         options,
       )
     }
-    Loading => skeleton_agents()
-    Failed(msg) => load_failed("agents", msg)
+    @util.Loading => skeleton_agents()
+    @util.Failed(msg) => load_failed("agents", msg)
   }
 }

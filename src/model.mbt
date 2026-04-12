@@ -4,10 +4,10 @@
 pub struct Model {
   config : @types.ServerConfig
   connection : @types.ConnectionStatus
-  projects : Status[Array[@types.Project]]
-  sessions : Status[Array[@types.Session]]
-  agents : Status[Array[@types.Agent]]
-  messages : Map[String, Status[Array[@types.ChatMessage]]]
+  projects : @util.Status[Array[@types.Project]]
+  sessions : @util.Status[Array[@types.Session]]
+  agents : @util.Status[Array[@types.Agent]]
+  messages : Map[String, @util.Status[Array[@types.ChatMessage]]]
   active_session_id : String
   active_project_id : String
   selected_agent : String
@@ -60,9 +60,9 @@ pub fn init_model(config : @types.ServerConfig) -> Model {
   {
     config,
     connection: @types.Disconnected,
-    projects: Success([]),
-    sessions: Loading,
-    agents: Success([]),
+    projects: @util.Success([]),
+    sessions: @util.Loading,
+    agents: @util.Success([]),
     messages: {},
     active_session_id: "",
     active_project_id: "",
