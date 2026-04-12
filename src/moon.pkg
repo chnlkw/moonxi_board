@@ -4,6 +4,7 @@ import {
   "moonbit-community/rabbita/http",
   "moonbit-community/rabbita/cmd",
   "moonbit-community/rabbita/sub",
+  "chnlkw/moonxi_board/src/api" @api,
   "chnlkw/moonxi_board/src/types" @types,
   "chnlkw/moonxi_board/src/util" @util,
 }

@@ -31,7 +31,7 @@ pub fn api_load_sessions(
       fn(result) {
         match result {
           Ok(json) =>
-            match decode_sessions(json) {
+            match @api.decode_sessions(json) {
               Ok(sessions) => dispatch(GotSessions(Ok(sessions)))
               Err(e) => dispatch(GotSessions(Err(e)))
             }
@@ -55,7 +55,7 @@ pub fn api_create_session(
       fn(result) {
         match result {
           Ok(json) =>
-            match decode_session(json) {
+            match @api.decode_session(json) {
               Ok(session) => dispatch(GotSessions(Ok([session])))
               Err(e) => dispatch(GotSessions(Err(e)))
             }
@@ -98,7 +98,7 @@ pub fn api_load_messages(
       fn(result) {
         match result {
           Ok(json) =>
-            match decode_messages(json) {
+            match @api.decode_messages(json) {
               Ok(messages) => dispatch(GotMessages(session_id, Ok(messages)))
               Err(e) => dispatch(GotMessages(session_id, Err(e)))
             }
@@ -128,7 +128,7 @@ pub fn api_send_message(
       fn(result) {
         match result {
           Ok(json) =>
-            match decode_messages(json) {
+            match @api.decode_messages(json) {
               Ok(messages) => dispatch(MessageSent(Ok(messages)))
               Err(e) => dispatch(MessageSent(Err(e)))
             }

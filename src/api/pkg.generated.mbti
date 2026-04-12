@@ -1,0 +1,32 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "chnlkw/moonxi_board/src/api"
+
+import {
+  "chnlkw/moonxi_board/src/types",
+}
+
+// Values
+pub fn decode_agent(Json) -> Result[@types.Agent, String]
+
+pub fn decode_agents(Json) -> Result[Array[@types.Agent], String]
+
+pub fn decode_message(Json) -> Result[@types.ChatMessage, String]
+
+pub fn decode_messages(Json) -> Result[Array[@types.ChatMessage], String]
+
+pub fn decode_project(Json) -> Result[@types.Project, String]
+
+pub fn decode_projects(Json) -> Result[Array[@types.Project], String]
+
+pub fn decode_session(Json) -> Result[@types.Session, String]
+
+pub fn decode_sessions(Json) -> Result[Array[@types.Session], String]
+
+// Errors
+
+// Types and methods
+
+// Type aliases
+
+// Traits
+

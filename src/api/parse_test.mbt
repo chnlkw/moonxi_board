@@ -225,7 +225,7 @@ test "decode_message parses real API response with tool/patch parts" {
   let result = decode_message(json)
   match result {
     Ok(m) => {
-      assert_true(m.role is Assistant)
+      assert_true(m.role is @types.Assistant)
       assert_eq(m.id, "msg_d78058cf6001MpNgZ3T1vPryXX")
       assert_eq(m.session_id, "ses_2c5b7cdf5ffe1dasG26wSqTkmc")
       // Should have 5 parts (step-start, reasoning->text, tool->text, step-finish, patch->text)

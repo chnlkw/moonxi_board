@@ -1,0 +1,3 @@
+import {
+  "chnlkw/moonxi_board/src/types" @types,
+}
