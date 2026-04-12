@@ -200,6 +200,11 @@ fn decode_message_part(json : Json) -> Result[MessagePart, String] {
     ({ "type": String("step-finish"), .. } : Json) => Ok(StepFinish("step"))
     ({ "type": String("reasoning"), .. } : Json) =>
       Ok(Text("💭 reasoning..."))
+    // Real API: type "tool" with nested state object
+    ({ "type": String("tool"), "tool": String(name), .. } : Json) =>
+      Ok(ToolCall({ tool_name: name, input: "(tool call)", status: Completed }))
+    // Real API: type "patch" (file changes)
+    ({ "type": String("patch"), .. } : Json) => Ok(Text(""))
     // Skip unknown types
     _ => Ok(Text(""))
   }
@@ -268,7 +273,7 @@ pub fn decode_messages(json : Json) -> Result[Array[ChatMessage], String] {
       for item in items {
         match decode_message(item) {
           Ok(m) => results.push(m)
-          Err(e) => return Err(e)
+          Err(_) => () // Skip individual failures, keep good messages
         }
       }
       Ok(results)

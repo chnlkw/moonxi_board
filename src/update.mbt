@@ -25,8 +25,15 @@ pub fn update(
       let cmd = api_load_messages(dispatch, model.config, id)
       (cmd, { ..model, active_session_id: id })
     }
-    GotMessages(_sid, Ok(_messages)) => (@cmd.none, model)
-    GotMessages(_, Err(_)) => (@cmd.none, model)
+    GotMessages(sid, Ok(messages)) => {
+      let _ = model.messages.set(sid, messages)
+      (@cmd.none, { ..model, messages: model.messages })
+    }
+    GotMessages(sid, Err(e)) => {
+      // Log decode error for debugging (visible in browser console)
+      let _ = log_error("decode_messages[\{sid}]: \{e}")
+      (@cmd.none, model)
+    }
     NewSessionClicked => {
       let cmd = api_create_session(dispatch, model.config)
       (cmd, model)
@@ -45,7 +52,12 @@ pub fn update(
         )
         (cmd, { ..model, input_text: "" })
       }
-    MessageSent(Ok(_messages)) => (@cmd.none, model)
+    MessageSent(Ok(messages)) => {
+      let sid = model.active_session_id
+      let existing = model.messages.get(sid).unwrap_or([])
+      let _ = model.messages.set(sid, existing + messages)
+      (@cmd.none, { ..model, messages: model.messages })
+    }
     MessageSent(Err(_)) => (@cmd.none, model)
     AgentSelected(name) => (@cmd.none, { ..model, selected_agent: name })
     ProjectSelected(id) => (@cmd.none, { ..model, active_project_id: id })
