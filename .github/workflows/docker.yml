@@ -27,7 +27,7 @@ jobs:
 
       - name: Build JS
         run: |
-          moon install
+          moon update
           moon build --target js
           cp _build/js/debug/build/src/src.js web/src.js
 
