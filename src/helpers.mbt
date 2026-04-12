@@ -3,6 +3,15 @@ extern "js" fn js_window_location_origin() -> String? =
   #|() => { try { var o = window.location.origin; return (o && typeof o === 'string') ? o : null } catch(e) { return null } }
 
 ///|
+extern "js" fn js_console_log(msg : String) -> Unit =
+  #|(msg) => { try { console.log("[moonxi]", msg) } catch(e) {} }
+
+///|
+pub fn log_error(msg : String) -> Unit {
+  js_console_log("ERROR: " + msg)
+}
+
+///|
 extern "js" fn js_localstorage_get(key : String) -> String? =
   #|(key) => { try { var v = localStorage.getItem(key); return (v !== null && v !== undefined && v !== '') ? v : null } catch(e) { return null } }
 

@@ -146,6 +146,129 @@ test "decode_message rejects invalid JSON" {
 }
 
 ///|
+test "decode_message parses real API response with tool/patch parts" {
+  // Exact format from real OpenCode Serve v1.4.x
+  let json : Json = {
+    "info": {
+      "parentID": "msg_prev",
+      "role": "assistant",
+      "mode": "Sisyphus (Ultraworker)",
+      "agent": "Sisyphus (Ultraworker)",
+      "path": {
+        "cwd": "/home/opencode/workspace",
+        "root": "/home/opencode/workspace",
+      },
+      "cost": 0,
+      "tokens": {
+        "total": 25997,
+        "input": 25508,
+        "output": 41,
+        "reasoning": 11,
+        "cache": { "write": 0, "read": 448 },
+      },
+      "modelID": "glm-5.1",
+      "providerID": "zhipuai-coding-plan",
+      "time": { "created": 1775835122934, "completed": 1775835139376 },
+      "finish": "tool-calls",
+      "id": "msg_d78058cf6001MpNgZ3T1vPryXX",
+      "sessionID": "ses_2c5b7cdf5ffe1dasG26wSqTkmc",
+    },
+    "parts": [
+      {
+        "snapshot": "abc123",
+        "type": "step-start",
+        "id": "prt_1",
+        "sessionID": "ses_abc",
+        "messageID": "msg_1",
+      },
+      {
+        "type": "reasoning",
+        "text": "thinking...",
+        "time": { "start": 1, "end": 2 },
+        "id": "prt_2",
+        "sessionID": "ses_abc",
+        "messageID": "msg_1",
+      },
+      {
+        "type": "tool",
+        "tool": "bash",
+        "callID": "call_123",
+        "state": {
+          "status": "completed",
+          "input": { "command": "ls -la", "description": "list files" },
+          "output": "file1\nfile2\n",
+        },
+        "id": "prt_3",
+        "sessionID": "ses_abc",
+        "messageID": "msg_1",
+      },
+      {
+        "reason": "tool-calls",
+        "snapshot": "def456",
+        "type": "step-finish",
+        "tokens": { "total": 100 },
+        "cost": 0,
+        "id": "prt_4",
+        "sessionID": "ses_abc",
+        "messageID": "msg_1",
+      },
+      {
+        "type": "patch",
+        "hash": "abc123",
+        "files": ["/home/opencode/workspace/test"],
+        "id": "prt_5",
+        "sessionID": "ses_abc",
+        "messageID": "msg_1",
+      },
+    ],
+  }
+  let result = decode_message(json)
+  match result {
+    Ok(m) => {
+      assert_true(m.role is Assistant)
+      assert_eq(m.id, "msg_d78058cf6001MpNgZ3T1vPryXX")
+      assert_eq(m.session_id, "ses_2c5b7cdf5ffe1dasG26wSqTkmc")
+      // Should have 5 parts (step-start, reasoning->text, tool->text, step-finish, patch->text)
+      assert_true(m.parts.length() >= 3)
+    }
+    Err(e) => {
+      println("DECODE FAILED: \{e}")
+      assert_true(false)
+    }
+  }
+}
+
+///|
+test "decode_messages tolerates individual bad messages" {
+  let json : Json = [
+    {
+      "info": {
+        "role": "user",
+        "time": { "created": 100 },
+        "id": "m1",
+        "sessionID": "s1",
+      },
+      "parts": [{ "type": "text", "text": "hi" }],
+    },
+    { "garbage": true },
+    {
+      "info": {
+        "role": "assistant",
+        "time": { "created": 200 },
+        "id": "m2",
+        "sessionID": "s1",
+      },
+      "parts": [{ "type": "text", "text": "hey" }],
+    },
+  ]
+  let result = decode_messages(json)
+  match result {
+    Ok(msgs) => assert_eq(msgs.length(), 2)
+    Err(_e) => assert_true(false)
+  }
+}
+
+///|
 test "decode_message handles reasoning and tool-call parts" {
   let json : Json = {
     "info": {
