@@ -29,7 +29,7 @@ jobs:
         run: |
           moon update
           moon build --target js
-          cp _build/js/debug/build/src/src.js web/src.js
+          cp _build/js/debug/build/src/main/main.js web/src.js
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3

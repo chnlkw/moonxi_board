@@ -12,7 +12,7 @@ echo "=== Building JS ==="
 echo "=== Preparing deploy dir ==="
 TMPDIR=$(mktemp -d)
 cp web/index.html "$TMPDIR/"
-cp _build/js/debug/build/src/src.js "$TMPDIR/"
+cp _build/js/debug/build/src/main/main.js "$TMPDIR/src.js"
 
 echo "=== Getting pod name ==="
 POD=$($KUBECTL get pods -n "$NAMESPACE" -l "app=$DEPLOY_NAME" -o jsonpath='{.items[0].metadata.name}')
