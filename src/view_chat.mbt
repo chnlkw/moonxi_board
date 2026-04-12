@@ -53,8 +53,8 @@ fn view_messages(model : Model) -> @html.Html {
         let bubbles = msgs.map(fn(m) { view_message_bubble(m) })
         fragment(bubbles)
       }
-    Some(@util.Loading) => skeleton_messages(3)
-    Some(@util.Failed(msg)) => load_failed("messages", msg)
+    Some(@util.Loading) => @view.skeleton_messages(3)
+    Some(@util.Failed(msg)) => @view.load_failed("messages", msg)
     None => div(class="messages-empty", [text("开始新对话吧 ✨")])
   }
 }
@@ -122,7 +122,7 @@ fn view_agent_selector(
         options,
       )
     }
-    @util.Loading => skeleton_agents()
-    @util.Failed(msg) => load_failed("agents", msg)
+    @util.Loading => @view.skeleton_agents()
+    @util.Failed(msg) => @view.load_failed("agents", msg)
   }
 }

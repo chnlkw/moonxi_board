@@ -57,8 +57,8 @@ fn view_session_groups(
       })
       fragment(groups)
     }
-    @util.Loading => skeleton_session_list(5)
-    @util.Failed(msg) => load_failed("sessions", msg)
+    @util.Loading => @view.skeleton_session_list(5)
+    @util.Failed(msg) => @view.load_failed("sessions", msg)
   }
 }
 

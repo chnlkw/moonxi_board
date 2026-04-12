@@ -60,8 +60,8 @@ fn view_agent_detail(model : Model) -> @html.Html {
             p([text("选择一个 Agent 查看详情")]),
           ])
       }
-    @util.Loading => skeleton_agents()
-    @util.Failed(msg) => load_failed("agents", msg)
+    @util.Loading => @view.skeleton_agents()
+    @util.Failed(msg) => @view.load_failed("agents", msg)
   }
 }
 
