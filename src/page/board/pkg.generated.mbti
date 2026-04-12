@@ -1,0 +1,125 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "chnlkw/moonxi_board/src/page/board"
+
+import {
+  "chnlkw/moonxi_board/src/types",
+  "chnlkw/moonxi_board/src/util",
+  "moonbit-community/rabbita/cmd",
+  "moonbit-community/rabbita/html",
+}
+
+// Values
+pub fn active_session_title(Model) -> String
+
+pub fn agent_icon(String) -> String
+
+pub fn agent_mode_label(@types.AgentMode) -> String
+
+pub fn api_create_session(@cmd.Dispatch[Msg], @types.ServerConfig) -> @cmd.Cmd
+
+pub fn api_delete_session(@cmd.Dispatch[Msg], @types.ServerConfig, String) -> @cmd.Cmd
+
+pub fn api_health_check(@cmd.Dispatch[Msg], @types.ServerConfig) -> @cmd.Cmd
+
+pub fn api_load_messages(@cmd.Dispatch[Msg], @types.ServerConfig, String) -> @cmd.Cmd
+
+pub fn api_load_sessions(@cmd.Dispatch[Msg], @types.ServerConfig) -> @cmd.Cmd
+
+pub fn api_send_message(@cmd.Dispatch[Msg], @types.ServerConfig, String, String, String) -> @cmd.Cmd
+
+pub fn append_message(Model, String, @types.ChatMessage) -> Model
+
+pub fn base_url() -> String
+
+pub fn check_achievement(@types.GameStats) -> String?
+
+pub fn connection_label(@types.ConnectionStatus) -> String
+
+pub fn find_agent_by_name(Array[@types.Agent], String) -> @types.Agent?
+
+pub fn increment_combo(@types.GameStats) -> @types.GameStats
+
+pub fn increment_messages(@types.GameStats) -> @types.GameStats
+
+pub fn init_model(@types.ServerConfig) -> Model
+
+pub fn log_error(String) -> Unit
+
+pub fn reset_combo(@types.GameStats) -> @types.GameStats
+
+pub fn save_base_url(String) -> Unit
+
+pub fn status_label(Model) -> String
+
+pub fn toggle_star(Array[@types.Session], String) -> Array[@types.Session]
+
+pub fn update(@cmd.Dispatch[Msg], Msg, Model) -> (@cmd.Cmd, Model)
+
+pub fn update_session(Array[@types.Session], @types.Session) -> Array[@types.Session]
+
+pub fn update_session_status(Array[@types.Session], String, @types.SessionStatus) -> Array[@types.Session]
+
+pub fn view(@cmd.Dispatch[Msg], Model) -> @html.Html
+
+pub fn view_chat(@cmd.Dispatch[Msg], Model) -> @html.Html
+
+pub fn view_detail(@cmd.Dispatch[Msg], Model) -> @html.Html
+
+pub fn view_sidebar(@cmd.Dispatch[Msg], Model) -> @html.Html
+
+// Errors
+
+// Types and methods
+pub struct Model {
+  config : @types.ServerConfig
+  connection : @types.ConnectionStatus
+  projects : @util.Status[Array[@types.Project]]
+  sessions : @util.Status[Array[@types.Session]]
+  agents : @util.Status[Array[@types.Agent]]
+  messages : Map[String, @util.Status[Array[@types.ChatMessage]]]
+  active_session_id : String
+  active_project_id : String
+  selected_agent : String
+  sidebar_open : Bool
+  detail_open : Bool
+  input_text : String
+  search_query : String
+  sse_connected : Bool
+  stats : @types.GameStats
+  base_url_input : String
+} derive(Show)
+
+pub enum Msg {
+  AppStarted
+  GotHealth(Result[String, String])
+  GotSessions(Result[Array[@types.Session], String])
+  GotAgents(Result[Array[@types.Agent], String])
+  GotProjects(Result[Array[@types.Project], String])
+  SelectSession(String)
+  GotMessages(String, Result[Array[@types.ChatMessage], String])
+  NewSessionClicked
+  InputChanged(String)
+  SendClicked
+  MessageSent(Result[Array[@types.ChatMessage], String])
+  AgentSelected(String)
+  ProjectSelected(String)
+  SearchInputChanged(String)
+  StarSession(String)
+  DeleteSession(String)
+  ToggleSidebar
+  ToggleDetail
+  SSEConnected
+  SSEDisconnected
+  SSEMessageUpdated(String, @types.ChatMessage)
+  SSESessionCreated(@types.Session)
+  SSESessionUpdated(@types.Session)
+  SSESessionDeleted(String)
+  KeyPressed(String)
+  BaseUrlChanged(String)
+  BaseUrlSubmitted
+}
+
+// Type aliases
+
+// Traits
+
