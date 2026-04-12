@@ -5,7 +5,7 @@ pub struct ServerConfig {
   base_url : String
   username : String
   password : String
-} derive(Show)
+} derive(Show, Eq)
 
 // === Connection ===
 
@@ -15,7 +15,7 @@ pub enum ConnectionStatus {
   Connecting
   Connected
   Error(String)
-} derive(Show)
+} derive(Show, Eq)
 
 // === Session ===
 
@@ -25,7 +25,7 @@ pub enum SessionStatus {
   Busy
   Compacting
   Error
-} derive(Show)
+} derive(Show, Eq)
 
 ///|
 pub struct Session {
@@ -39,7 +39,7 @@ pub struct Session {
   agent_name : String
   is_starred : Bool
   unread_count : Int
-} derive(Show)
+} derive(Show, Eq)
 
 // === Message ===
 
@@ -47,7 +47,7 @@ pub struct Session {
 pub enum MessageRole {
   User
   Assistant
-} derive(Show)
+} derive(Show, Eq)
 
 ///|
 pub enum ToolStatus {
@@ -55,14 +55,14 @@ pub enum ToolStatus {
   Completed
   Failed
   PendingApproval
-} derive(Show)
+} derive(Show, Eq)
 
 ///|
 pub struct ToolCallInfo {
   tool_name : String
   input : String
   status : ToolStatus
-} derive(Show)
+} derive(Show, Eq)
 
 ///|
 pub enum MessagePart {
@@ -70,7 +70,7 @@ pub enum MessagePart {
   ToolCall(ToolCallInfo)
   StepStart(String)
   StepFinish(String)
-} derive(Show)
+} derive(Show, Eq)
 
 ///|
 pub struct ChatMessage {
@@ -80,7 +80,7 @@ pub struct ChatMessage {
   parts : Array[MessagePart]
   created_at : Int
   model_id : String
-} derive(Show)
+} derive(Show, Eq)
 
 // === Agent ===
 
@@ -89,7 +89,7 @@ pub enum AgentMode {
   Primary
   Subagent
   All
-} derive(Show)
+} derive(Show, Eq)
 
 ///|
 pub struct Agent {
@@ -98,8 +98,8 @@ pub struct Agent {
   mode : AgentMode
   color : String
   model_id : String
-  tools : Map[String, Bool]
-} derive(Show)
+  tools : Array[(String, Bool)]
+} derive(Show, Eq)
 
 // === Project ===
 
@@ -108,7 +108,7 @@ pub struct Project {
   id : String
   name : String
   directory : String
-} derive(Show)
+} derive(Show, Eq)
 
 // === Game Stats ===
 
@@ -116,7 +116,7 @@ pub struct Project {
 pub struct GameStats {
   total_messages : Int
   combo_streak : Int
-} derive(Show)
+} derive(Show, Eq)
 
 // === Main Model ===
 

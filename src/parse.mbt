@@ -123,7 +123,7 @@ pub fn decode_agent(json : Json) -> Result[Agent, String] {
     } : Json) => {
       let mode = decode_agent_mode(mode_json)
       let c = if color != "" { color } else { "#e94560" }
-      Ok({ name, description: "", mode, color: c, model_id, tools: {} })
+      Ok({ name, description: "", mode, color: c, model_id, tools: [] })
     }
     _ => Err("invalid agent JSON")
   }

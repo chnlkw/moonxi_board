@@ -61,13 +61,12 @@ fn view_agent_detail(model : Model) -> @html.Html {
 }
 
 ///|
-fn view_tools_list(tools : Map[String, Bool]) -> @html.Html {
-  let tool_names = tools.keys().collect()
-  if tool_names.length() == 0 {
+fn view_tools_list(tools : Array[(String, Bool)]) -> @html.Html {
+  if tools.length() == 0 {
     p(class="no-tools", [text("暂无工具信息")])
   } else {
-    let items = tool_names.map(fn(name) {
-      let enabled = tools.get(name).unwrap_or(false)
+    let items = tools.map(fn(entry) {
+      let (name, enabled) = entry
       let icon = if enabled { "✅" } else { "❌" }
       div(class="tool-item", [
         span(class="tool-icon", [text(icon)]),
