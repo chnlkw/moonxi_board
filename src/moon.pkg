@@ -1,13 +1,7 @@
 import {
   "moonbit-community/rabbita",
-  "moonbit-community/rabbita/html",
-  "moonbit-community/rabbita/http",
-  "moonbit-community/rabbita/cmd",
-  "moonbit-community/rabbita/sub",
-  "chnlkw/moonxi_board/src/api" @api,
   "chnlkw/moonxi_board/src/types" @types,
-  "chnlkw/moonxi_board/src/util" @util,
-  "chnlkw/moonxi_board/src/view" @view,
+  "chnlkw/moonxi_board/src/page/board" @board,
 }
 
 options(

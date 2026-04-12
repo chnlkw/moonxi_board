@@ -1,0 +1,118 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "chnlkw/moonxi_board/src/types"
+
+// Values
+pub fn make_agent(String, String, AgentMode, String, String, Array[(String, Bool)]) -> Agent
+
+pub fn make_chat_message(String, String, MessageRole, Array[MessagePart], Int, String) -> ChatMessage
+
+pub fn make_game_stats(Int, Int) -> GameStats
+
+pub fn make_project(String, String, String) -> Project
+
+pub fn make_server_config(String, String, String) -> ServerConfig
+
+pub fn make_session(String, String, String, String, SessionStatus, Int, Int, String, Bool, Int) -> Session
+
+pub fn make_tool_call_info(String, String, ToolStatus) -> ToolCallInfo
+
+// Errors
+
+// Types and methods
+pub(all) struct Agent {
+  name : String
+  description : String
+  mode : AgentMode
+  color : String
+  model_id : String
+  tools : Array[(String, Bool)]
+} derive(Eq, Show)
+
+pub(all) enum AgentMode {
+  Primary
+  Subagent
+  All
+} derive(Eq, Show)
+
+pub(all) struct ChatMessage {
+  id : String
+  session_id : String
+  role : MessageRole
+  parts : Array[MessagePart]
+  created_at : Int
+  model_id : String
+} derive(Eq, Show)
+
+pub(all) enum ConnectionStatus {
+  Disconnected
+  Connecting
+  Connected
+  Error(String)
+} derive(Eq, Show)
+
+pub(all) struct GameStats {
+  total_messages : Int
+  combo_streak : Int
+} derive(Eq, Show)
+
+pub(all) enum MessagePart {
+  Text(String)
+  ToolCall(ToolCallInfo)
+  StepStart(String)
+  StepFinish(String)
+} derive(Eq, Show)
+
+pub(all) enum MessageRole {
+  User
+  Assistant
+} derive(Eq, Show)
+
+pub(all) struct Project {
+  id : String
+  name : String
+  directory : String
+} derive(Eq, Show)
+
+pub(all) struct ServerConfig {
+  base_url : String
+  username : String
+  password : String
+} derive(Eq, Show)
+
+pub(all) struct Session {
+  id : String
+  project_id : String
+  title : String
+  directory : String
+  status : SessionStatus
+  created_at : Int
+  updated_at : Int
+  agent_name : String
+  is_starred : Bool
+  unread_count : Int
+} derive(Eq, Show)
+
+pub(all) enum SessionStatus {
+  Idle
+  Busy
+  Compacting
+  Error
+} derive(Eq, Show)
+
+pub(all) struct ToolCallInfo {
+  tool_name : String
+  input : String
+  status : ToolStatus
+} derive(Eq, Show)
+
+pub(all) enum ToolStatus {
+  Running
+  Completed
+  Failed
+  PendingApproval
+} derive(Eq, Show)
+
+// Type aliases
+
+// Traits
+

@@ -2,6 +2,8 @@
 package "chnlkw/moonxi_board/src"
 
 import {
+  "chnlkw/moonxi_board/src/types",
+  "chnlkw/moonxi_board/src/util",
   "moonbit-community/rabbita/cmd",
   "moonbit-community/rabbita/html",
 }
@@ -11,53 +13,37 @@ pub fn active_session_title(Model) -> String
 
 pub fn agent_icon(String) -> String
 
-pub fn agent_mode_label(AgentMode) -> String
+pub fn agent_mode_label(@types.AgentMode) -> String
 
-pub fn api_create_session(@cmd.Dispatch[Msg], ServerConfig) -> @cmd.Cmd
+pub fn api_create_session(@cmd.Dispatch[Msg], @types.ServerConfig) -> @cmd.Cmd
 
-pub fn api_delete_session(@cmd.Dispatch[Msg], ServerConfig, String) -> @cmd.Cmd
+pub fn api_delete_session(@cmd.Dispatch[Msg], @types.ServerConfig, String) -> @cmd.Cmd
 
-pub fn api_health_check(@cmd.Dispatch[Msg], ServerConfig) -> @cmd.Cmd
+pub fn api_health_check(@cmd.Dispatch[Msg], @types.ServerConfig) -> @cmd.Cmd
 
-pub fn api_load_messages(@cmd.Dispatch[Msg], ServerConfig, String) -> @cmd.Cmd
+pub fn api_load_messages(@cmd.Dispatch[Msg], @types.ServerConfig, String) -> @cmd.Cmd
 
-pub fn api_load_sessions(@cmd.Dispatch[Msg], ServerConfig) -> @cmd.Cmd
+pub fn api_load_sessions(@cmd.Dispatch[Msg], @types.ServerConfig) -> @cmd.Cmd
 
-pub fn api_send_message(@cmd.Dispatch[Msg], ServerConfig, String, String, String) -> @cmd.Cmd
+pub fn api_send_message(@cmd.Dispatch[Msg], @types.ServerConfig, String, String, String) -> @cmd.Cmd
 
-pub fn append_message(Model, String, ChatMessage) -> Model
+pub fn append_message(Model, String, @types.ChatMessage) -> Model
 
 pub fn base_url() -> String
 
-pub fn check_achievement(GameStats) -> String?
+pub fn check_achievement(@types.GameStats) -> String?
 
-pub fn connection_label(ConnectionStatus) -> String
-
-pub fn decode_agent(Json) -> Result[Agent, String]
-
-pub fn decode_agents(Json) -> Result[Array[Agent], String]
-
-pub fn decode_message(Json) -> Result[ChatMessage, String]
-
-pub fn decode_messages(Json) -> Result[Array[ChatMessage], String]
-
-pub fn decode_project(Json) -> Result[Project, String]
-
-pub fn decode_projects(Json) -> Result[Array[Project], String]
-
-pub fn decode_session(Json) -> Result[Session, String]
-
-pub fn decode_sessions(Json) -> Result[Array[Session], String]
+pub fn connection_label(@types.ConnectionStatus) -> String
 
 pub fn empty_state(String) -> @html.Html
 
-pub fn find_agent_by_name(Array[Agent], String) -> Agent?
+pub fn find_agent_by_name(Array[@types.Agent], String) -> @types.Agent?
 
-pub fn increment_combo(GameStats) -> GameStats
+pub fn increment_combo(@types.GameStats) -> @types.GameStats
 
-pub fn increment_messages(GameStats) -> GameStats
+pub fn increment_messages(@types.GameStats) -> @types.GameStats
 
-pub fn init_model(ServerConfig) -> Model
+pub fn init_model(@types.ServerConfig) -> Model
 
 pub fn load_failed(String, String) -> @html.Html
 
@@ -65,7 +51,7 @@ pub fn loading_spinner() -> @html.Html
 
 pub fn log_error(String) -> Unit
 
-pub fn reset_combo(GameStats) -> GameStats
+pub fn reset_combo(@types.GameStats) -> @types.GameStats
 
 pub fn save_base_url(String) -> Unit
 
@@ -77,13 +63,13 @@ pub fn skeleton_session_list(Int) -> @html.Html
 
 pub fn status_label(Model) -> String
 
-pub fn toggle_star(Array[Session], String) -> Array[Session]
+pub fn toggle_star(Array[@types.Session], String) -> Array[@types.Session]
 
 pub fn update(@cmd.Dispatch[Msg], Msg, Model) -> (@cmd.Cmd, Model)
 
-pub fn update_session(Array[Session], Session) -> Array[Session]
+pub fn update_session(Array[@types.Session], @types.Session) -> Array[@types.Session]
 
-pub fn update_session_status(Array[Session], String, SessionStatus) -> Array[Session]
+pub fn update_session_status(Array[@types.Session], String, @types.SessionStatus) -> Array[@types.Session]
 
 pub fn view(@cmd.Dispatch[Msg], Model) -> @html.Html
 
@@ -96,61 +82,13 @@ pub fn view_sidebar(@cmd.Dispatch[Msg], Model) -> @html.Html
 // Errors
 
 // Types and methods
-pub struct Agent {
-  name : String
-  description : String
-  mode : AgentMode
-  color : String
-  model_id : String
-  tools : Array[(String, Bool)]
-} derive(Eq, Show)
-
-pub enum AgentMode {
-  Primary
-  Subagent
-  All
-} derive(Eq, Show)
-
-pub struct ChatMessage {
-  id : String
-  session_id : String
-  role : MessageRole
-  parts : Array[MessagePart]
-  created_at : Int
-  model_id : String
-} derive(Eq, Show)
-
-pub enum ConnectionStatus {
-  Disconnected
-  Connecting
-  Connected
-  Error(String)
-} derive(Eq, Show)
-
-pub struct GameStats {
-  total_messages : Int
-  combo_streak : Int
-} derive(Eq, Show)
-
-pub enum MessagePart {
-  Text(String)
-  ToolCall(ToolCallInfo)
-  StepStart(String)
-  StepFinish(String)
-} derive(Eq, Show)
-
-pub enum MessageRole {
-  User
-  Assistant
-} derive(Eq, Show)
-
 pub struct Model {
-  config : ServerConfig
-  connection : ConnectionStatus
-  projects : Status[Array[Project]]
-  sessions : Status[Array[Session]]
-  agents : Status[Array[Agent]]
-  messages : Map[String, Status[Array[ChatMessage]]]
+  config : @types.ServerConfig
+  connection : @types.ConnectionStatus
+  projects : @util.Status[Array[@types.Project]]
+  sessions : @util.Status[Array[@types.Session]]
+  agents : @util.Status[Array[@types.Agent]]
+  messages : Map[String, @util.Status[Array[@types.ChatMessage]]]
   active_session_id : String
   active_project_id : String
   selected_agent : String
@@ -159,22 +97,22 @@ pub struct Model {
   input_text : String
   search_query : String
   sse_connected : Bool
-  stats : GameStats
+  stats : @types.GameStats
   base_url_input : String
 } derive(Show)
 
 pub enum Msg {
   AppStarted
   GotHealth(Result[String, String])
-  GotSessions(Result[Array[Session], String])
-  GotAgents(Result[Array[Agent], String])
-  GotProjects(Result[Array[Project], String])
+  GotSessions(Result[Array[@types.Session], String])
+  GotAgents(Result[Array[@types.Agent], String])
+  GotProjects(Result[Array[@types.Project], String])
   SelectSession(String)
-  GotMessages(String, Result[Array[ChatMessage], String])
+  GotMessages(String, Result[Array[@types.ChatMessage], String])
   NewSessionClicked
   InputChanged(String)
   SendClicked
-  MessageSent(Result[Array[ChatMessage], String])
+  MessageSent(Result[Array[@types.ChatMessage], String])
   AgentSelected(String)
   ProjectSelected(String)
   SearchInputChanged(String)
@@ -184,65 +122,14 @@ pub enum Msg {
   ToggleDetail
   SSEConnected
   SSEDisconnected
-  SSEMessageUpdated(String, ChatMessage)
-  SSESessionCreated(Session)
-  SSESessionUpdated(Session)
+  SSEMessageUpdated(String, @types.ChatMessage)
+  SSESessionCreated(@types.Session)
+  SSESessionUpdated(@types.Session)
   SSESessionDeleted(String)
   KeyPressed(String)
   BaseUrlChanged(String)
   BaseUrlSubmitted
 }
-
-pub struct Project {
-  id : String
-  name : String
-  directory : String
-} derive(Eq, Show)
-
-pub struct ServerConfig {
-  base_url : String
-  username : String
-  password : String
-} derive(Eq, Show)
-
-pub struct Session {
-  id : String
-  project_id : String
-  title : String
-  directory : String
-  status : SessionStatus
-  created_at : Int
-  updated_at : Int
-  agent_name : String
-  is_starred : Bool
-  unread_count : Int
-} derive(Eq, Show)
-
-pub enum SessionStatus {
-  Idle
-  Busy
-  Compacting
-  Error
-} derive(Eq, Show)
-
-pub(all) enum Status[T] {
-  Loading
-  Failed(String)
-  Success(T)
-} derive(Eq, Show)
-
-pub struct ToolCallInfo {
-  tool_name : String
-  input : String
-  status : ToolStatus
-} derive(Eq, Show)
-
-pub enum ToolStatus {
-  Running
-  Completed
-  Failed
-  PendingApproval
-} derive(Eq, Show)
 
 // Type aliases
 
